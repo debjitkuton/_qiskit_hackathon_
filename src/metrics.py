@@ -131,7 +131,7 @@ def _worker(cfg: dict) -> dict:
     from .process import file_chunks, get_backend, make_identity, run_loopback_transfer
 
     backend = get_backend(cfg["param_set"])
-    implementation = {
+    implementation = getattr(backend, "implementation", None) or {
         "classical-p256": "cryptography",
         "hybrid-L3": "cryptography + liboqs-python",
     }.get(cfg["param_set"], "liboqs-python")
@@ -374,9 +374,12 @@ def run_mitm_table(sets=None, out_dir: Path = RESULTS_TABLES) -> pd.DataFrame:
     sets, _ = available_sets(sets or COMPARISON_SETS)
     rows = []
     for key in sets:
-        for row in mitm_scenarios(get_backend(key)):
-            implementation = "cryptography" if key == "classical-p256" else (
-                "cryptography + liboqs-python" if key == "hybrid-L3" else "liboqs-python"
+        backend = get_backend(key)
+        for row in mitm_scenarios(backend):
+            implementation = getattr(backend, "implementation", None) or (
+                "cryptography" if key == "classical-p256" else (
+                    "cryptography + liboqs-python" if key == "hybrid-L3" else "liboqs-python"
+                )
             )
             rows.append({"param_set": key, "crypto_implementation": implementation, **row})
     df = pd.DataFrame(rows)

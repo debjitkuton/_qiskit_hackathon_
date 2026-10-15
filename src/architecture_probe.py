@@ -10,7 +10,10 @@ from __future__ import annotations
 import csv
 import json
 import math
+import warnings
 from pathlib import Path
+
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="qiskit")
 
 from .problem import PROCESSORS_DIR, RESULTS_FIGURES, RESULTS_TABLES
 

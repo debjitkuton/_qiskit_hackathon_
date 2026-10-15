@@ -94,6 +94,8 @@ class OQSBackend(Backend):
     does not substitute locally implemented cryptography or synthetic standard-sized objects.
     """
 
+    implementation = "liboqs-python"
+
     def __init__(self, kem_alg: str, sig_alg: str, name: str = "oqs"):
         self.kem_alg, self.sig_alg, self.name = kem_alg, sig_alg, name
         try:
@@ -145,6 +147,67 @@ class OQSBackend(Backend):
                 return False
 
 
+class PQCryptoBackend(Backend):
+    """ML-KEM (FIPS 203) and ML-DSA (FIPS 204) through the vetted pqcrypto package."""
+
+    implementation = "pqcrypto"
+
+    def __init__(self, kem_alg: str, sig_alg: str, name: str = "pqcrypto"):
+        self.kem_alg, self.sig_alg, self.name = kem_alg, sig_alg, name
+        import importlib
+        kem_mod_name = kem_alg.lower().replace("-", "_")
+        sig_mod_name = sig_alg.lower().replace("-", "_")
+        try:
+            self._kem = importlib.import_module(f"pqcrypto.kem.{kem_mod_name}")
+            self._sig = importlib.import_module(f"pqcrypto.sign.{sig_mod_name}")
+        except Exception as exc:
+            raise BackendUnavailable(
+                f"pqcrypto does not provide the requested algorithms: {kem_alg}, {sig_alg}"
+            ) from exc
+
+    def kem_keygen(self):
+        pk, sk = self._kem.keygen()
+        return bytes(pk), bytes(sk)
+
+    def kem_encaps(self, pk):
+        ct, ss = self._kem.encaps(pk)
+        return bytes(ct), bytes(ss)
+
+    def kem_decaps(self, sk, ct):
+        return bytes(self._kem.decaps(sk, ct))
+
+    def sig_keygen(self):
+        pk, sk = self._sig.keygen()
+        return bytes(pk), bytes(sk)
+
+    def sign(self, sk, msg):
+        return bytes(self._sig.sign(sk, msg))
+
+    def verify(self, pk, msg, sig):
+        try:
+            self._sig.verify(pk, msg, sig)
+            return True
+        except Exception:
+            return False
+
+
+def make_pqc_backend(kem_alg: str, sig_alg: str, name: str = "pqc") -> Backend:
+    """Instantiate a vetted PQC backend (preferring liboqs, falling back to pqcrypto)."""
+    errors = []
+    try:
+        return OQSBackend(kem_alg, sig_alg, name=name)
+    except BackendUnavailable as exc:
+        errors.append(f"liboqs: {exc}")
+    try:
+        return PQCryptoBackend(kem_alg, sig_alg, name=name)
+    except Exception as exc:
+        errors.append(f"pqcrypto: {exc}")
+    raise BackendUnavailable(
+        "PQC requires a vetted backend (liboqs-python with native liboqs, or pqcrypto); "
+        "no simulated or homemade cryptographic fallback is used. Details: " + " | ".join(errors)
+    )
+
+
 _P256 = ec.SECP256R1()
 _P256_POINT_LEN = 65  # uncompressed X9.62 point
 
@@ -153,6 +216,7 @@ class ClassicalBackend(Backend):
     """ECDH P-256 key agreement (as a KEM) + ECDSA P-256 signatures. Quantum-VULNERABLE baseline."""
 
     name = "classical-p256"
+    implementation = "cryptography"
     kem_alg = "ECDH-P-256"
     sig_alg = "ECDSA-P-256"
 
@@ -211,9 +275,11 @@ class HybridBackend(Backend):
 
     def __init__(self, kem_alg: str = "ML-KEM-768", sig_alg: str = "ML-DSA-65"):
         self._classical = ClassicalBackend()
-        self._pqc = OQSBackend(kem_alg, sig_alg, name="hybrid-pqc-part")
+        self._pqc = make_pqc_backend(kem_alg, sig_alg, name="hybrid-pqc-part")
         self.kem_alg = f"ECDH-P-256+{kem_alg}"
         self.sig_alg = sig_alg
+        pqc_impl = getattr(self._pqc, "implementation", "pqc")
+        self.implementation = f"cryptography + {pqc_impl}"
 
     def kem_keygen(self):
         cpk, csk = self._classical.kem_keygen()
@@ -248,7 +314,7 @@ def get_backend(set_key: str = DEFAULT_SET) -> Backend:
         return ClassicalBackend()
     if set_key == "hybrid-L3":
         return HybridBackend()
-    return OQSBackend(ps.kem, ps.sig, name=set_key)
+    return make_pqc_backend(ps.kem, ps.sig, name=set_key)
 
 
 # --------------------------------------------------------------------------------------
