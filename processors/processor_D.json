@@ -1,0 +1,31 @@
+{
+  "name": "Processor D (3x3 grid - team design)",
+  "source": "Team-designed Phase 1 Processor D: 9-qubit 2D nearest-neighbour planar grid",
+  "num_qubits": 9,
+  "topology": "3x3 planar grid",
+  "coupling_map": [
+    [0, 1], [1, 2],
+    [3, 4], [4, 5],
+    [6, 7], [7, 8],
+    [0, 3], [3, 6],
+    [1, 4], [4, 7],
+    [2, 5], [5, 8]
+  ],
+  "bidirectional": true,
+  "basis_gates": ["rz", "sx", "x", "cx"],
+  "noise": {
+    "type": "challenge_defined",
+    "source": "Challenge Kit section 3.4",
+    "single_qubit_depolarizing": 0.001,
+    "cx_depolarizing": 0.005,
+    "readout_bitflip": 0.01
+  },
+  "benchmark": {
+    "shots": 4096,
+    "transpile_optimization_level": 1,
+    "layout_routing": "SABRE",
+    "seed": 42
+  },
+  "design_rationale": "Processor A (5-qubit chain) has diameter 4 and max SWAP overhead 3; Processor B (9-qubit sparse tree) has diameter 5 and max SWAP overhead 4. Both suffer from limited routing paths — the chain is a serial bottleneck and the sparse tree has dead-end branches. Processor D uses a 3x3 planar grid (12 bidirectional edges, 9 qubits) which achieves diameter 4 (same as A) and average SWAP lower-bound 1.0 (same as A), but provides multi-path routing at every interior node (degree 4) and eliminates the dead-end branches of B. The planar layout is physically realisable on a 2D superconducting chip without wire crossovers.",
+  "note": "Processor D is a team-designed supplemental topology for comparative analysis. It is not a required Challenge Kit processor. Graph metrics: 9 qubits, 12 edges, diameter 4, avg_shortest_path 2.0, avg_swap_lower_bound 1.0, max_swap 3."
+}

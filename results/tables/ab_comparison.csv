@@ -1,3 +1,0 @@
-processor,depth,cx_count,single_qubit_gates,swap_count,physical_qubits_used,shots,p_success_ideal,p_success_noisy,noise_model,transpile
-A,89,45,69,7,3,4096,0.949462890625,0.75,kit fixed model,"opt_level=1, SABRE, seed=42"
-B,89,45,69,7,3,4096,0.949462890625,0.75,kit fixed model,"opt_level=1, SABRE, seed=42"

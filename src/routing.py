@@ -78,7 +78,7 @@ KIT_COUPLING = {
     "A": CANDIDATE_TOPOLOGIES["A"]["chain_baseline"]["coupling_map"],
     "B": CANDIDATE_TOPOLOGIES["B"]["tree_baseline"]["coupling_map"],
 }
-KIT_QUBITS = {"A": 5, "B": 9}
+KIT_QUBITS = {"A": 5, "B": 9, "D": 9}
 
 # Processor C is STUDY/REFERENCE ONLY (13 qubits): 12-node ring + centre qubit 12. Not required.
 PROCESSOR_C_STUDY = [(i, (i + 1) % 12) for i in range(12)] + [(12, k) for k in (0, 2, 4, 6, 8, 10)]
@@ -159,6 +159,10 @@ def processor_graph_table() -> pd.DataFrame:
             continue
         rows.append({"processor": f"Candidate B: {t_info['name']}", "required": False, **graph_metrics(build_graph(t_info["coupling_map"], 9))})
     rows.append({"processor": "Processor C (study only)", "required": False, **graph_metrics(build_graph(PROCESSOR_C_STUDY, 13))})
+    # Processor D — team-designed supplemental topology for comparative analysis
+    proc_d = load_processor("D")
+    rows.append({"processor": proc_d["name"], "required": False,
+                 **graph_metrics(build_graph(proc_d["coupling_map"], proc_d["num_qubits"]))})
     return pd.DataFrame(rows)
 
 
@@ -252,11 +256,13 @@ def routing_estimate_table() -> pd.DataFrame:
                          "swaps_estimate": sw, "cx_estimate": len(gates) + 3 * sw,
                          "method": f"identity layout, {proc.get('topology', 'custom')}"})
     # Comparative candidate analysis as requested by organizers
+    proc_d = load_processor("D")
     topos_to_compare = [
         ("A - Chain (Baseline)", CANDIDATE_TOPOLOGIES["A"]["chain_baseline"]["coupling_map"], 5),
         ("A - Ring (optional candidate)", CANDIDATE_TOPOLOGIES["A"]["ring"]["coupling_map"], 5),
         ("B - Sparse Graph (required)", CANDIDATE_TOPOLOGIES["B"]["tree_baseline"]["coupling_map"], 9),
         ("B - 3x3 Grid (optional candidate)", CANDIDATE_TOPOLOGIES["B"]["grid_3x3"]["coupling_map"], 9),
+        ("D - 3x3 Grid (team design)", proc_d["coupling_map"], proc_d["num_qubits"]),
     ]
     for topo_name, cm, nq in topos_to_compare:
         g = build_graph(cm, nq)

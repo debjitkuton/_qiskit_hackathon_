@@ -23,3 +23,7 @@ GHZ-5 (chain CX),B - 3x3 Grid (optional candidate),4,2,10,candidate comparison
 GHZ-5 (star CX from q0),B - 3x3 Grid (optional candidate),4,2,10,candidate comparison
 "Toffoli decomposition (q0,q1->q2)",B - 3x3 Grid (optional candidate),5,3,14,candidate comparison
 All-to-all 5 qubits (QFT-like),B - 3x3 Grid (optional candidate),10,8,34,candidate comparison
+GHZ-5 (chain CX),D - 3x3 Grid (team design),4,2,10,candidate comparison
+GHZ-5 (star CX from q0),D - 3x3 Grid (team design),4,2,10,candidate comparison
+"Toffoli decomposition (q0,q1->q2)",D - 3x3 Grid (team design),5,3,14,candidate comparison
+All-to-all 5 qubits (QFT-like),D - 3x3 Grid (team design),10,8,34,candidate comparison

@@ -54,6 +54,9 @@ def _node_pos(g: nx.Graph, key: str, topology: str) -> dict:
         if "grid" in top_lower or "mesh" in top_lower:
             return {i: (float(i % 3), float(-(i // 3))) for i in range(n)}
         return nx.spring_layout(g, seed=42)
+    elif key == "D":
+        # 3x3 grid layout: row-major, y increases downward
+        return {i: (float(i % 3), float(-(i // 3))) for i in range(n)}
     return nx.spring_layout(g, seed=42)
 
 
@@ -210,7 +213,8 @@ def fig_routing() -> Path | None:
 
 
 def make_all() -> list[str]:
-    made = [draw_processor("A"), draw_processor("B"), draw_processor_c_study(), draw_handshake_flow()]
+    made = [draw_processor("A"), draw_processor("B"), draw_processor("D"),
+            draw_processor_c_study(), draw_handshake_flow()]
     for fn in (fig_headline, fig_sizes, fig_transfer, fig_memory, fig_chunk_sweep, fig_routing):
         r = fn()
         if r is not None:
