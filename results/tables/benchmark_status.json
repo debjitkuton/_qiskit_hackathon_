@@ -7,7 +7,7 @@
   "hybrid-L3"
  ],
  "skipped_sets": {},
- "quick": false,
+ "quick": true,
  "seed_payloads_only": 42,
  "backend_policy": "PQC requires vetted liboqs-python; no simulated or homemade fallback"
 }

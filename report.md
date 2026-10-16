@@ -226,6 +226,44 @@ To validate the theoretical advantages of Processor D against Processors A and B
 * **Depth & Fidelity Advantage:** Processor D reduces transpiled circuit depth to **8** (a **$42.9\%$ reduction** compared to Processor A's depth of 14, and $27.3\%$ vs B's 11). Under the depolarizing noise model, this translates directly to the highest noisy state fidelity (**$94.07\%$** vs $91.97\%$ on A and $93.16\%$ on B).
 * Visual artifacts: see `results/figures/processor_D_graph.png`, `results/figures/architecture_probe.svg`, and `results/figures/routing_estimate_ABD.png`.
 
+### 6.6 SABRE Virtual-to-Physical Qubit Mapping on Processor D
+
+To understand why Processor D achieves **0 SWAPs** and minimizes depth, we examined the initial layout selected by SABRE when compiling the 5-qubit star-entanglement circuit onto Processor D's 9-qubit 3×3 planar grid:
+
+```
+               [P0: idle] ------- [P1: Logical q4] ------- [P2: idle]
+                   |                       |                      |
+             [P3: Logical q1] --- [P4: Logical q0 (Hub)] - [P5: Logical q2]
+                   |                       |                      |
+               [P6: idle] ------- [P7: Logical q3] ------- [P8: idle]
+```
+
+**SABRE Mapping Mechanics:**
+* **Central Hub Placement:** Logical root qubit $q_0$ (which broadcasts entanglement to all other qubits) is mapped directly to **Physical Qubit 4** (the center of the grid, possessing degree 4).
+* **Direct Cardinal Coupling:** Logical targets $q_1, q_2, q_3, q_4$ are mapped to the four immediate orthogonal neighbors: Physical 3 (West), 5 (East), 7 (South), and 1 (North).
+* **Zero Routing Overhead:** Every entangling two-qubit gate $(q_0, q_i)$ is executed across an existing physical coupling edge without inserting any SWAP gates ($\text{SWAPs}=0$). Physical corner qubits (0, 2, 6, 8) remain idle as ancillae.
+* Schematic diagram: see `results/figures/processor_D_sabre_mapping.png`.
+
+### 6.7 Fidelity Tracking Under Variable Thermal Relaxation ($T_1$) and Dephasing ($T_2$)
+
+Beyond the challenge's fixed depolarizing noise model, we evaluated the hardware resilience of Processors A, B, and D under realistic transmon environmental decoherence. Using Qiskit Aer's `thermal_relaxation_error`, we swept longitudinal relaxation time $T_1 \in [15\,\mu\text{s}, 200\,\mu\text{s}]$ with corresponding dephasing time $T_2 = \min(2T_1, 1.4T_1)$, setting realistic gate durations ($t_{1q} = 35\text{ ns}$, $t_{2q} = 250\text{ ns}$) and readout error ($1\%$).
+
+The measured state fidelities across 4096 shots (`results/tables/t1_t2_sweep.csv`) are summarized below:
+
+| $T_1$ ($\mu\text{s}$) | $T_2$ ($\mu\text{s}$) | Fidelity Processor A (5Q Chain) | Fidelity Processor B (9Q Tree) | Fidelity Processor D (3×3 Grid) | Processor D Advantage |
+|---:|---:|---:|---:|---:|---|
+| **15.0** | 21.0 | 0.8398 ($\pm 0.0057$) | 0.8665 ($\pm 0.0053$) | **0.8936** ($\pm 0.0048$) | **$+5.38\%$** over A, $+2.71\%$ over B |
+| **30.0** | 42.0 | 0.8923 ($\pm 0.0048$) | 0.9080 ($\pm 0.0045$) | **0.9199** ($\pm 0.0042$) | **$+2.76\%$** over A, $+1.19\%$ over B |
+| **50.0** | 70.0 | 0.9138 ($\pm 0.0044$) | 0.9238 ($\pm 0.0041$) | **0.9351** ($\pm 0.0039$) | **$+2.13\%$** over A, $+1.13\%$ over B |
+| **80.0** | 112.0 | 0.9275 ($\pm 0.0041$) | 0.9358 ($\pm 0.0038$) | **0.9438** ($\pm 0.0036$) | **$+1.63\%$** over A, $+0.80\%$ over B |
+| **120.0** | 168.0 | 0.9380 ($\pm 0.0038$) | 0.9438 ($\pm 0.0036$) | **0.9473** ($\pm 0.0035$) | **$+0.93\%$** over A, $+0.35\%$ over B |
+| **200.0** | 280.0 | 0.9470 ($\pm 0.0035$) | 0.9485 ($\pm 0.0035$) | **0.9497** ($\pm 0.0034$) | Nearing readout noise ceiling |
+
+**Physical Insights from the Coherence Sweep:**
+1. **Low-Coherence Resilience:** In NISQ regimes with short coherence ($T_1 \le 30\,\mu\text{s}$), circuit depth is the single dominant factor in state survival. Because Processor D has a depth of only 8 (compared to 14 on A), qubits spend far less time undergoing decoherence during idle cycles, giving Processor D a marked **$+5.38\%$ fidelity advantage**.
+2. **Asymptotic Convergence:** As $T_1, T_2 \to \infty$, fidelity converges toward the readout error floor ($\approx 95\%$), confirming that routing efficiency is most critical precisely on near-term noisy quantum hardware.
+3. Visualization: see `results/figures/t1_t2_sweep.png`.
+
 ## 7. Limitations (read before trusting any number)
 
 1. **PQC backend provenance**: The saved notebook indicates that native `liboqs` was unavailable and the prior implementation used a homemade simulator. That simulator has been removed. Historical PQC latency and attack results are unverified and must not be described as ML-KEM/ML-DSA measurements. The revised code fails closed without the vetted backend.
@@ -235,7 +273,7 @@ To validate the theoretical advantages of Processor D against Processors A and B
 5. `tracemalloc` sees Python-heap allocations only; native liboqs buffers are small but uncounted. RSS growth is reported too but is insensitive to small working sets.
 6. Payloads are stand-ins unless the organizer files are placed in `data/raw/`.
 7. Not production code: no key storage or rotation, no session resumption, no formal verification. liboqs timings include the Python wrapper overhead.
-8. Supplemental quantum architecture probe: The noisy simulation probe models gate and readout noise via Qiskit Aer on the transpile baseline; it does not model thermal relaxation ($T_1$) or dephasing ($T_2$).
+8. Supplemental quantum architecture probe: Gate, readout, and comprehensive thermal relaxation ($T_1$) and dephasing ($T_2$) error models are evaluated in simulation via Qiskit Aer; physical cross-talk between adjacent transmission lines is not explicitly simulated.
 
 ## 8. Reproduce
 

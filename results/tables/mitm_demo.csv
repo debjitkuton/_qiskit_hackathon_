@@ -8,7 +8,7 @@ pqc-L3,pqcrypto,attacker replays an encrypted record,AES-GCM tag check fails (se
 pqc-L3,pqcrypto,attacker truncates the stream,stream ends without authenticated final record,True,False,ConnectionError: peer closed the connection,True
 pqc-L1,pqcrypto,no attacker (control),handshake + transfer succeed,False,True,none,True
 pqc-L1,pqcrypto,attacker swaps client KEM key and re-signs,server rejects client signature,True,False,ConnectionError: peer closed the connection | HandshakeError: client signature invalid - possible man-in-the-middle,True
-pqc-L1,pqcrypto,attacker corrupts server KEM ciphertext,client rejects server signature,True,False,HandshakeError: server signature invalid - possible man-in-the-middle | ConnectionError: peer closed the connection,True
+pqc-L1,pqcrypto,attacker corrupts server KEM ciphertext,client rejects server signature,True,False,HandshakeError: server signature invalid - possible man-in-the-middle | ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine,True
 pqc-L1,pqcrypto,attacker forges ServerHello with own key,client rejects server signature,True,False,HandshakeError: server signature invalid - possible man-in-the-middle | ConnectionError: peer closed the connection,True
 pqc-L1,pqcrypto,attacker flips a bit in an encrypted record,AES-GCM tag check fails,True,False,"RecordError: AES-GCM authentication failed (tampered, replayed or reordered record)",True
 pqc-L1,pqcrypto,attacker replays an encrypted record,AES-GCM tag check fails (sequence number),True,False,"RecordError: AES-GCM authentication failed (tampered, replayed or reordered record)",True

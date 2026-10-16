@@ -179,6 +179,77 @@ def run_probe(shots: int = SHOTS, seed: int = SEED) -> list[dict]:
     return rows
 
 
+def run_t1_t2_sweep(
+    t1_values_us: list[float] | None = None,
+    time_1q_ns: float = 35.0,
+    time_2q_ns: float = 250.0,
+    shots: int = SHOTS,
+    seed: int = SEED,
+) -> list[dict]:
+    """Sweep thermal relaxation (T1) and dephasing (T2) times across Processors A, B, and D."""
+    from qiskit import transpile
+    from qiskit_aer import AerSimulator
+    from qiskit_aer.noise import NoiseModel, ReadoutError, thermal_relaxation_error
+
+    if t1_values_us is None:
+        t1_values_us = [15.0, 30.0, 50.0, 80.0, 120.0, 200.0]
+
+    logical = ghz5_circuit()
+    compiled_circuits = {}
+    for key in ("A", "B", "D"):
+        _, cmap = _coupling_map(key)
+        compiled_circuits[key] = transpile(
+            logical,
+            coupling_map=cmap,
+            basis_gates=BASIS_GATES,
+            optimization_level=1,
+            layout_method="sabre",
+            routing_method="sabre",
+            seed_transpiler=seed,
+        )
+
+    rows = []
+    p_readout = NOISE["readout_bitflip"]
+    readout_err = ReadoutError([[1 - p_readout, p_readout], [p_readout, 1 - p_readout]])
+
+    for t1_us in t1_values_us:
+        t1_ns = t1_us * 1e3
+        t2_ns = min(2.0 * t1_ns, t1_ns * 1.4)  # physical constraint T2 <= 2*T1
+        nm = NoiseModel(basis_gates=BASIS_GATES)
+        e1 = thermal_relaxation_error(t1_ns, t2_ns, time_1q_ns)
+        e2 = thermal_relaxation_error(t1_ns, t2_ns, time_2q_ns).expand(
+            thermal_relaxation_error(t1_ns, t2_ns, time_2q_ns)
+        )
+        nm.add_all_qubit_quantum_error(e1, ["rz", "sx", "x"])
+        nm.add_all_qubit_quantum_error(e2, ["cx"])
+        nm.add_all_qubit_readout_error(readout_err)
+
+        sim = AerSimulator(noise_model=nm, seed_simulator=seed)
+        row = {
+            "t1_us": t1_us,
+            "t2_us": round(t2_ns / 1e3, 1),
+            "gate_time_1q_ns": time_1q_ns,
+            "gate_time_2q_ns": time_2q_ns,
+        }
+        for key in ("A", "B", "D"):
+            counts = sim.run(compiled_circuits[key], shots=shots).result().get_counts()
+            fid = _success_probability(counts, shots)
+            row[f"fidelity_{key}"] = round(fid, 4)
+            row[f"stderr_{key}"] = round(math.sqrt(fid * (1 - fid) / shots), 4)
+        rows.append(row)
+
+    RESULTS_TABLES.mkdir(parents=True, exist_ok=True)
+    with (RESULTS_TABLES / "t1_t2_sweep.csv").open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+    return rows
+
+
 if __name__ == "__main__":
     for result in run_probe():
         print(json.dumps(result))
+    print("\nRunning T1/T2 thermal relaxation sweep:")
+    for sweep_row in run_t1_t2_sweep():
+        print(json.dumps(sweep_row))

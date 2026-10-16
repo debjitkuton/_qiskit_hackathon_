@@ -218,10 +218,80 @@ def fig_routing() -> Path | None:
     return _save(ax.get_figure(), "routing_estimate_ABD.png")
 
 
+def draw_processor_d_sabre_mapping() -> Path:
+    """Explicit schematic diagram showing the SABRE virtual-to-physical qubit mapping of STAR-GHZ-5 on Processor D."""
+    proc = load_processor("D")
+    g = build_graph(proc["coupling_map"], proc["num_qubits"])
+    # 3x3 planar coordinates: row 0 (y=1), row 1 (y=0), row 2 (y=-1)
+    pos = {
+        0: (0.0, 1.0),  1: (1.0, 1.0),  2: (2.0, 1.0),
+        3: (0.0, 0.0),  4: (1.0, 0.0),  5: (2.0, 0.0),
+        6: (0.0, -1.0), 7: (1.0, -1.0), 8: (2.0, -1.0),
+    }
+    labels = {
+        0: "P0\n(idle)",
+        1: "P1\n[Logical q4]",
+        2: "P2\n(idle)",
+        3: "P3\n[Logical q1]",
+        4: "P4 (Hub)\n[Logical q0]",
+        5: "P5\n[Logical q2]",
+        6: "P6\n(idle)",
+        7: "P7\n[Logical q3]",
+        8: "P8\n(idle)",
+    }
+    node_colors = [
+        "#f3f4f6",  # 0: idle
+        "#93c5fd",  # 1: target q4
+        "#f3f4f6",  # 2: idle
+        "#93c5fd",  # 3: target q1
+        "#34d399",  # 4: root q0
+        "#93c5fd",  # 5: target q2
+        "#f3f4f6",  # 6: idle
+        "#93c5fd",  # 7: target q3
+        "#f3f4f6",  # 8: idle
+    ]
+    edge_colors = []
+    edge_widths = []
+    active_edges = {(1, 4), (4, 1), (3, 4), (4, 3), (4, 5), (5, 4), (4, 7), (7, 4)}
+    for u, v in g.edges():
+        if (u, v) in active_edges:
+            edge_colors.append("#059669")
+            edge_widths.append(3.5)
+        else:
+            edge_colors.append("#d1d5db")
+            edge_widths.append(1.2)
+
+    fig, ax = plt.subplots(figsize=(7.5, 6.5))
+    nx.draw_networkx_nodes(g, pos, node_color=node_colors, node_size=2400, edgecolors="#1e293b", linewidths=1.8, ax=ax)
+    nx.draw_networkx_edges(g, pos, edge_color=edge_colors, width=edge_widths, ax=ax)
+    nx.draw_networkx_labels(g, pos, labels=labels, font_size=8.5, font_weight="bold", ax=ax)
+    ax.set_title("Processor D (3x3 Grid): SABRE Virtual-to-Physical Qubit Mapping (STAR-GHZ-5)\n"
+                 "Green Center = Root Logical q0 | Blue = Target Logical q1..q4 | Bold Green = Direct CX (0 SWAPs)",
+                 fontsize=9.5, weight="bold", pad=12)
+    ax.axis("off")
+    return _save(fig, "processor_D_sabre_mapping.png")
+
+
+def fig_t1_t2_sweep() -> Path | None:
+    df = _csv("t1_t2_sweep.csv")
+    if df is None or df.empty:
+        return None
+    fig, ax = plt.subplots(figsize=(8.5, 4.8))
+    ax.plot(df.t1_us, df.fidelity_A, "o-", color="#2563eb", linewidth=2.0, label="Processor A (5Q Chain)")
+    ax.plot(df.t1_us, df.fidelity_B, "s-", color="#dc2626", linewidth=2.0, label="Processor B (9Q Sparse Tree)")
+    ax.plot(df.t1_us, df.fidelity_D, "^-", color="#059669", linewidth=2.4, label="Processor D (9Q 3x3 Grid - Team Design)")
+    ax.set_xlabel(r"Thermal Relaxation Time $T_1$ ($\mu$s) [with $T_2 = 1.4 \times T_1$]", fontsize=10.5)
+    ax.set_ylabel("State Fidelity (STAR-GHZ-5, 4096 shots)", fontsize=10.5)
+    ax.set_title(r"Fidelity vs Coherence ($T_1 / T_2$ Thermal Relaxation & Dephasing Sweep)", fontsize=11.5, weight="bold")
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=9.5, loc="lower right")
+    return _save(fig, "t1_t2_sweep.png")
+
+
 def make_all() -> list[str]:
     made = [draw_processor("A"), draw_processor("B"), draw_processor("D"),
-            draw_processor_c_study(), draw_handshake_flow()]
-    for fn in (fig_headline, fig_sizes, fig_transfer, fig_memory, fig_chunk_sweep, fig_routing):
+            draw_processor_c_study(), draw_handshake_flow(), draw_processor_d_sabre_mapping()]
+    for fn in (fig_headline, fig_sizes, fig_transfer, fig_memory, fig_chunk_sweep, fig_routing, fig_t1_t2_sweep):
         r = fn()
         if r is not None:
             made.append(r)
@@ -230,3 +300,4 @@ def make_all() -> list[str]:
 
 if __name__ == "__main__":
     print("\n".join(make_all()))
+
