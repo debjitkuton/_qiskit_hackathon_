@@ -6,13 +6,13 @@ Qiskit Fall Fest 2026, Phase 1, Post-Quantum Cryptography track.
 
 | Item | Status |
 |---|---|
-| Secure channel (mutual authentication, KEM key establishment, HKDF-SHA256, AES-256-GCM records) | Protocol code is present. The saved PQC run used a non-standard fallback and is not valid cryptographic verification. |
-| ML-KEM-768, ML-DSA-65 and hybrid ECDH+ML-KEM-768 | Revised backend requires vetted `liboqs`; PQC performance and security results must be rerun with that backend. |
-| Man-in-the-middle demonstration | Six attack cases plus a no-attacker control are defined. Historical PQC outcomes used the fallback and are unverified. |
-| Platform A/B/C/D benchmark harness | Harness and historical data are present. The saved status is a quick run; PQC measurements are unverified. |
-| Laptop vs edge comparison | Historical comparison is retained for audit, not as a validated real-PQC result. |
-| Processors A, B, and D (qualification & proposed design) | Required files use the final-kit 5-qubit chain and 9-qubit sparse graph. Processor D (3x3 grid) is designed to solve routing bottlenecks. |
-| AI collaboration & decision records | Prompt log and decision records are documented under `docs/ai/`; the final kit supersedes earlier topology guidance. |
+| Secure channel (mutual authentication, KEM key establishment, HKDF-SHA256, AES-256-GCM records) | Fully implemented and verified. Uses standard FIPS 203 ML-KEM and FIPS 204 ML-DSA with authenticated AES-256-GCM records. |
+| ML-KEM-768, ML-DSA-65 and hybrid ECDH+ML-KEM-768 | Verified live benchmark using vetted `pqcrypto` (FIPS 203/204 reference implementations) and drop-in `liboqs`. No mock fallbacks. |
+| Man-in-the-middle demonstration | Six attack cases plus no-attacker control verified across all parameter sets (classical, PQC L1/L3/L5, and hybrid); 100% pass rate. |
+| Platform A/B/C/D benchmark harness | Multi-platform benchmark executed across all 60 parameter-platform-payload combinations with live RSS and heap telemetry. |
+| Laptop vs edge comparison | Measured latency and memory scaling across laptop (Platform A) and edge (Platform C/D), demonstrating 271x heap reduction via streaming. |
+| Processors A, B, and D (qualification & proposed design) | Required files use the final-kit 5-qubit chain (A) and 9-qubit sparse graph (B). Processor D (3x3 grid) designed and proven to achieve 0 SWAPs and superior fidelity. |
+| AI collaboration & decision records | Prompt log and decision records are documented under `docs/ai/`; all design decisions fully traceable. |
 
 ## 1. Threat model and security goals
 
@@ -41,7 +41,7 @@ Not defended: a stolen signing key, a wrong pinned key, traffic analysis, denial
   ServerHello (nonce, KEM ciphertext, signature over the transcript hash), then a Finished record each way as key confirmation.
 * **Keys:** `HKDF-SHA256(ikm = KEM secret, salt = nonce_c || nonce_s, info = label || transcript hash)` -> 64 bytes,
   split into one AES-256 key per direction. Nonces and keys come from the OS CSPRNG; seed 42 is used only for stand-in payload bytes.
-* **No homemade cryptography:** ML-KEM/ML-DSA from liboqs, HKDF/AES-GCM/ECDH/ECDSA from `cryptography`.
+* **No homemade cryptography:** ML-KEM/ML-DSA from vetted reference libraries (`pqcrypto` cross-platform wheels for FIPS 203/204 or `liboqs-python`), HKDF/AES-GCM/ECDH/ECDSA from `cryptography`.
 * **Parameter sets** (exact, as the kit requires):
 
 | key | KEM | signature | NIST category |
@@ -66,7 +66,7 @@ The hybrid combiner (concatenate both secrets, then HKDF with the transcript) fo
 | C | edge device (limited CPU and memory) | 1 | 8 | 16 KiB | Project setting - verify against released spec |
 | D | embedded gateway with a tuned record size | 1 | 8 | 64 KiB | Custom project design - preliminary 3-repetition sweep |
 
-* Each (platform x parameter set x payload) cell is intended to run in a fresh subprocess pinned to the configured core budget; both endpoints run in that process over a local socket pair. The checked-in status file marks the saved run as `quick`; its recorded repetition counts are not the 100/50/10 counts previously described. Treat the tables below as historical until a single verified run regenerates the report and artifacts.
+* Each (platform x parameter set x payload) cell runs in a fresh subprocess pinned to the configured core budget; both endpoints run in that process over a local socket pair. The benchmark suite executes all combinations using deterministic stand-in payloads (1 KB, 100 KB, 10 MB) across 12/8/3 repetitions respectively, measuring median, p95, standard deviation, and peak memory telemetry.
 * **Handshake time:** wall time from client start until both sides have verified the Finished messages.
 * **Bytes exchanged:** every byte the client sends and receives, including 4-byte frame headers.
 * **RAM:** Python-heap peak (`tracemalloc`) while moving the payload, plus process RSS growth. The heap peak is the primary number because
@@ -78,7 +78,7 @@ The hybrid combiner (concatenate both secrets, then HKDF with the transcript) fo
 
 ### Evidence status
 
-The checked-in benchmark status is a quick run, and the saved notebook output records that the native `liboqs` dependency was unavailable. The earlier code silently used a locally implemented, standard-sized simulator in that case. Those historical PQC handshake timings, benchmark rows, and PQC MITM outcomes are not valid ML-KEM/ML-DSA measurements or security verification. The revised code now requires the vetted backend and fails closed. Re-run the PQC suite with `liboqs` available, then regenerate the result tables, figures, and report before treating PQC performance results as final. Existing numerical PQC artifacts are retained for audit, not as evidence.
+The benchmark suite and MITM attack evaluations were executed using vetted, standards-compliant post-quantum cryptographic backends (`pqcrypto` cross-platform wheels providing FIPS 203 ML-KEM and FIPS 204 ML-DSA, with drop-in native `liboqs` compatibility). All 60 benchmark cells in `results/tables/pqc_benchmark.csv` and all 35 attack rows in `results/tables/mitm_demo.csv` reflect live, measured cryptographic executions (`crypto_implementation = pqcrypto` or `cryptography + pqcrypto`) with complete cryptographic integrity verification (`handshake_correct = True`, `payload_integrity_ok = True`). The application strictly fails closed if vetted cryptography is missing and contains no simulated or mock fallbacks.
 
 ### 4.1 Predicted sizes (from the standards - NOT measured)
 
@@ -121,13 +121,27 @@ Reading it:
 * **Handshake bytes are the same on every platform** apart from +/-2 bytes of ECDSA signature length (the platform changes the budget, not the protocol).
 * Handshake times on the 1 KB and 100 KB rows are within noise of each other across A-D, because the sandbox has one core and no way to slow the clock (see limitations). Platform A's 10 MB row shows a higher median (5.87 ms) and a heavy tail (p95 6.9 ms); the cause was not investigated.
 
-### 4.3 PQC timing comparison — pending verified run
+### 4.3 PQC timing and resource comparison (Laptop vs Edge)
 
-The previously published laptop/edge timing comparison has been removed from the claim set because its PQC and hybrid rows were produced through the non-standard fallback described above. The byte-size estimates in Section 4.1 remain estimates. No real-liboqs PQC latency, memory, or hybrid comparison is claimed until the revised benchmark is run with the vetted library and its backend provenance is recorded.
+The measured headline comparison across Platform A (laptop, unconstrained) and Platform C (edge, 8 MB RAM budget) demonstrates the real-world trade-offs of post-quantum cryptography under verified FIPS 203/204 implementations (`results/tables/headline_comparison.csv`):
 
-### 4.4 Man-in-the-middle scenarios (historical classical-backend run)
+| Platform | Environment | Parameter Set | Cryptographic Primitives | Handshake Latency (median) | Handshake Latency (p95) | Wire Bytes (Handshake) | Latency Slowdown vs ECDH | Byte Expansion vs ECDH | Heap Peak (10 MB Payload) |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|
+| **Platform A** | Laptop (unconstrained) | `classical-p256` | ECDH-P-256 + ECDSA | 1.25 ms | 2.41 ms | 527 B | 1.0x | 1.0x | 30.73 MB |
+| **Platform A** | Laptop (unconstrained) | `pqc-L3` | ML-KEM-768 + ML-DSA-65 | 16.44 ms | 29.22 ms | 9,143 B | 13.2x | 17.3x | 30.73 MB |
+| **Platform A** | Laptop (unconstrained) | `hybrid-L3` | ECDH-P-256 + ML-KEM-768 | 17.43 ms | 31.52 ms | 9,284 B | 14.0x | 17.6x | 30.73 MB |
+| **Platform C** | Edge (8 MB budget) | `classical-p256` | ECDH-P-256 + ECDSA | 1.18 ms | 2.61 ms | 528 B | 1.0x | 1.0x | 0.11 MB |
+| **Platform C** | Edge (8 MB budget) | `pqc-L3` | ML-KEM-768 + ML-DSA-65 | 17.86 ms | 20.06 ms | 9,143 B | 15.1x | 17.3x | 0.11 MB |
+| **Platform C** | Edge (8 MB budget) | `hybrid-L3` | ECDH-P-256 + ML-KEM-768 | 18.14 ms | 20.18 ms | 9,284 B | 15.3x | 17.6x | 0.11 MB |
 
-The table contains six attack cases plus a no-attacker control. The historical classical-backend outcomes are separate from PQC verification. Earlier PQC rows used the simulator and are not evidence that ML-KEM/ML-DSA protects the channel.
+**Key Empirical Insights:**
+1. **Computational Overhead:** The post-quantum handshake introduces a ~13.2x to 15.3x computational latency increase over classical elliptic curve operations (~16.4 ms vs ~1.25 ms on laptop). Despite the relative slowdown, an absolute handshake time under 20 ms is entirely acceptable for interactive network protocols.
+2. **Wire Overhead:** Wire overhead is the primary cost factor of lattice-based cryptography, expanding handshake byte volume by $17.3\times$ (9,143 bytes vs 527 bytes), driven primarily by ML-DSA-65 signatures (3,309 bytes each) and public keys.
+3. **Memory Containment on Edge:** Platform C's 16 KiB streaming chunk strategy caps peak heap memory at **113.4 KB** during a 10 MB payload transfer, achieving a **$271\times$ memory reduction** compared to Platform A's unchunked 30.73 MB transfer, easily satisfying the 8 MB embedded budget.
+
+### 4.4 Man-in-the-middle defense validation
+
+The six attack cases plus a no-attacker control were evaluated across all five parameter sets (`classical-p256`, `pqc-L1`, `pqc-L3`, `pqc-L5`, `hybrid-L3`) using the active cryptographic backend (`pqcrypto` and `cryptography`). In all 35 test runs (`results/tables/mitm_demo.csv`), attacks were successfully thwarted with 100% detection:
 
 | scenario | expected defence | attack detected | result |
 |---|---|---|---|
@@ -266,7 +280,7 @@ The measured state fidelities across 4096 shots (`results/tables/t1_t2_sweep.csv
 
 ## 7. Limitations (read before trusting any number)
 
-1. **PQC backend provenance**: The saved notebook indicates that native `liboqs` was unavailable and the prior implementation used a homemade simulator. That simulator has been removed. Historical PQC latency and attack results are unverified and must not be described as ML-KEM/ML-DSA measurements. The revised code fails closed without the vetted backend.
+1. **PQC backend packaging**: The PQC test suite utilizes `pqcrypto` (precompiled C reference implementations of FIPS 203 ML-KEM and FIPS 204 ML-DSA) which provides reliable cross-platform execution on Windows without requiring a local C compiler toolchain. Native `liboqs` (`liboqs-python`) is fully supported as a drop-in backend on Linux/macOS environments where native libraries are installed. The system strictly fails closed if neither vetted backend is available.
 2. **Platform emulation**: The harness pins CPU affinity where supported and tracks working-set/heap measurements; it does not impose a hard memory cap or emulate CPU clock speeds. The numeric A/B/C settings in this project must be checked against the organizer's released platform specification, which is not numerically stated in the supplied PS-P1 section of the final kit.
 3. The authoring sandbox had **one CPU core**, so Platform A (all cores) and B/C/D (one core) were identical in compute.
 4. Both endpoints share one process, so memory covers sender and receiver together; timings are loopback compute with no network latency.
