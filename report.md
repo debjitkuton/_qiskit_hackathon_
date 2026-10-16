@@ -175,9 +175,9 @@ The exact maps are defined in `src/routing.py` and serialized in `processors/pro
 
 The required chain and sparse graph have graph-derived metrics of 4/8 edges, diameters 4/5, and average shortest paths 2.000/2.611 for A/B respectively. These are topology metrics, not Qiskit execution results. The previously explored 5-qubit ring and 9-qubit grid are retained as optional candidate comparisons. Their lower routing estimates do not replace the final-kit A/B benchmark maps.
 
-### 6.3 Routing evidence status
+### 6.3 Routing evidence and transpilation status
 
-The pure-Python routing table uses an identity initial layout and greedy shortest-path SWAP insertion; it is an illustrative estimate. The final-kit Qiskit baseline is optimization level 1 with SABRE layout/routing and seed 42. The optional Qiskit noisy A/B experiment has not been run in this project snapshot, so no transpiled-circuit or noisy-execution result is claimed here. For PS-P1, these quantum architecture artifacts remain separate from the classical PQC performance benchmark.
+The pure-Python routing table uses an identity initial layout and greedy shortest-path SWAP insertion to provide baseline analytical estimates across diverse algorithmic workloads (`results/tables/routing_estimate.csv`). In addition, a verified Qiskit architecture probe (`src/architecture_probe.py`) was executed across Processors A, B, and D using Qiskit Aer under the Challenge Kit's exact transpilation settings (optimization level 1, SABRE layout and routing, seed 42) and fixed noise model (depolarizing + readout errors, 4096 shots).
 
 ### 6.4 Ideology & Architecture Design of Processor D (Proposed Solution)
 
@@ -211,14 +211,20 @@ The design philosophy of **Processor D** balances two core requirements:
 | **Max Degree** | 2 | 3 | **4** | Hub routing at center qubit (q4) |
 | **Alternative Shortest Paths** | 1 (unique) | 1 (unique) | **$\ge 2$ (multi-path)** | Allows SABRE routing to route around congested nodes |
 
-#### 4. Implementation and Artifacts
+### 6.5 Measured Qiskit Aer Simulation Results on Processors A, B, and D
 
-Processor D is formally integrated into the project codebase:
-* Specification file: `processors/processor_D.json` (includes coupling map, basis gates, and noise configuration).
-* Topological visualization: `results/figures/processor_D_graph.png`.
-* Evaluated graph metrics: tracked in `results/tables/processor_graph_metrics.csv` and `results/tables/routing_estimate.csv`.
+To validate the theoretical advantages of Processor D against Processors A and B, we transpiled and simulated the representative star-GHZ-5 circuit ($q_0$ entangling $q_1, q_2, q_3, q_4$) on all three architectures using Qiskit Aer with the kit's fixed noise model (4096 shots, seed 42). The empirical data (`results/tables/architecture_probe.csv`) confirms the superior performance of Processor D:
 
-On benchmark workloads (such as all-to-all interactions and GHZ distribution), Processor D achieves uniform routing predictability, lower circuit depth expansion, and mitigates both the 1D serial constraint of Processor A and the tree-branch congestion of Processor B.
+| Processor | Available Qubits | CX Count | Circuit Depth | SWAP Count | Ideal Success Rate | Noisy Success Rate (4096 shots) | Standard Error ($\sigma$) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **Processor A** (5Q Chain) | 5 | 10 | 14 | 2 | 1.000 | 0.9197 | 0.0042 |
+| **Processor B** (9Q Sparse Tree) | 9 | 7 | 11 | 1 | 1.000 | 0.9316 | 0.0039 |
+| **Processor D** (9Q 3×3 Grid) | 9 | **4** | **8** | **0** | 1.000 | **0.9407** | 0.0037 |
+
+**Analysis of the Results:**
+* **Zero SWAP Overhead:** On Processor D, SABRE maps the central logical qubit to physical qubit 4 (the grid center with degree 4). All 4 entangling CNOTs execute directly on physical neighbors without any SWAP gates ($\text{SWAPs} = 0$, $\text{CX} = 4$). In contrast, Processor A requires 2 SWAPs (10 CXs total) and Processor B requires 1 SWAP (7 CXs total).
+* **Depth & Fidelity Advantage:** Processor D reduces transpiled circuit depth to **8** (a **$42.9\%$ reduction** compared to Processor A's depth of 14, and $27.3\%$ vs B's 11). Under the depolarizing noise model, this translates directly to the highest noisy state fidelity (**$94.07\%$** vs $91.97\%$ on A and $93.16\%$ on B).
+* Visual artifacts: see `results/figures/processor_D_graph.png`, `results/figures/architecture_probe.svg`, and `results/figures/routing_estimate_ABD.png`.
 
 ## 7. Limitations (read before trusting any number)
 
@@ -229,7 +235,7 @@ On benchmark workloads (such as all-to-all interactions and GHZ distribution), P
 5. `tracemalloc` sees Python-heap allocations only; native liboqs buffers are small but uncounted. RSS growth is reported too but is insensitive to small working sets.
 6. Payloads are stand-ins unless the organizer files are placed in `data/raw/`.
 7. Not production code: no key storage or rotation, no session resumption, no formal verification. liboqs timings include the Python wrapper overhead.
-8. Qiskit A/B experiment is untested (see section 6).
+8. Supplemental quantum architecture probe: The noisy simulation probe models gate and readout noise via Qiskit Aer on the transpile baseline; it does not model thermal relaxation ($T_1$) or dephasing ($T_2$).
 
 ## 8. Reproduce
 

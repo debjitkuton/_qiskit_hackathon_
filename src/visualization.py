@@ -202,14 +202,20 @@ def fig_routing() -> Path | None:
     df = _csv("routing_estimate.csv")
     if df is None or df.empty:
         return None
-    df = df[df.processor.isin(("Processor A", "Processor B"))]
+    valid = ["Processor A", "Processor B", "D - 3x3 Grid (team design)"]
+    df = df[df.processor.isin(valid)].copy()
     if df.empty:
         return None
+    rename_map = {"D - 3x3 Grid (team design)": "Processor D (3x3 Grid)"}
+    df["processor"] = df["processor"].replace(rename_map)
     piv = df.pivot(index="workload", columns="processor", values="swaps_estimate")
-    ax = piv.plot.bar(figsize=(9, 4.5), color=["#2563eb", "#dc2626"], rot=15)
-    ax.set_ylabel("estimated SWAPs"); ax.set_title("Illustrative routing estimate on required A/B maps (identity layout)")
+    cols = [c for c in ["Processor A", "Processor B", "Processor D (3x3 Grid)"] if c in piv.columns]
+    piv = piv[cols]
+    ax = piv.plot.bar(figsize=(10, 4.8), color=["#2563eb", "#dc2626", "#059669"], rot=15)
+    ax.set_ylabel("estimated SWAPs")
+    ax.set_title("Illustrative SWAP routing overhead: Processor A vs B vs D (identity layout)")
     ax.grid(axis="y", alpha=0.3)
-    return _save(ax.get_figure(), "routing_estimate_AB.png")
+    return _save(ax.get_figure(), "routing_estimate_ABD.png")
 
 
 def make_all() -> list[str]:

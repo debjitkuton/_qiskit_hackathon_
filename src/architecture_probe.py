@@ -112,7 +112,7 @@ def run_probe(shots: int = SHOTS, seed: int = SEED) -> list[dict]:
     noise_model = _noise_model()
     rows: list[dict] = []
     circuit_text = ["Logical circuit (same input on A and B):", str(logical)]
-    for key in ("A", "B"):
+    for key in ("A", "B", "D"):
         processor, cmap = _coupling_map(key)
         compiled = transpile(
             logical,
