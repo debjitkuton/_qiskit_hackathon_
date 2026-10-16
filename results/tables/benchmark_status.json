@@ -1,9 +1,7 @@
 {
  "measured_sets": [
-  "pqc-L3",
-  "pqc-L1",
-  "pqc-L5",
   "classical-p256",
+  "pqc-L3",
   "hybrid-L3"
  ],
  "skipped_sets": {},

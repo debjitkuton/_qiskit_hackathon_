@@ -4,6 +4,6 @@ architecture_probe.py,222,10783
 metrics.py,378,23658
 problem.py,84,4715
 process.py,698,33616
-routing.py,285,16909
+routing.py,288,17090
 visualization.py,258,14674
-TOTAL,1927,104489
+TOTAL,1930,104670
