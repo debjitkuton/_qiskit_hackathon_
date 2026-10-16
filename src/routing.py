@@ -77,6 +77,7 @@ CANDIDATE_TOPOLOGIES = {
 KIT_COUPLING = {
     "A": CANDIDATE_TOPOLOGIES["A"]["chain_baseline"]["coupling_map"],
     "B": CANDIDATE_TOPOLOGIES["B"]["tree_baseline"]["coupling_map"],
+    "D": CANDIDATE_TOPOLOGIES["B"]["grid_3x3"]["coupling_map"],
 }
 KIT_QUBITS = {"A": 5, "B": 9, "D": 9}
 
@@ -205,12 +206,14 @@ def build_processor_dict(key: str, variant: str = None) -> dict:
 
 
 def write_processor_files() -> dict:
-    """Generate only the required final-kit Processor A/B files."""
+    """Generate only the required final-kit Processor A/B files and validate D."""
     out = {}
     (Path(PROCESSORS_DIR) / "processor_A.json").write_text(json.dumps(build_processor_dict("A"), indent=2) + "\n")
     out["A"] = validate("A") or "OK"
     (Path(PROCESSORS_DIR) / "processor_B.json").write_text(json.dumps(build_processor_dict("B"), indent=2) + "\n")
     out["B"] = validate("B") or "OK"
+    if (Path(PROCESSORS_DIR) / "processor_D.json").exists():
+        out["D"] = validate("D") or "OK"
     return out
 
 
