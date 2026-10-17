@@ -5,11 +5,11 @@
 [![Payload](https://img.shields.io/badge/Payload-AES--256--GCM-purple?style=flat-square)](src/process.py)
 [![Qiskit](https://img.shields.io/badge/Qiskit-1.x-613399?style=flat-square)](src/routing.py)
 
-**Problem ID / title:** PS-P1 - Quantum-Safe Secure Channel (Post-Quantum Cryptography track), Qiskit Fall Fest 2026, Phase 1.
-
-**Team name:** _ByteMyCache_
-
+**Problem ID / title:** PS-P1 - Quantum-Safe Secure Channel (Post-Quantum Cryptography track), Qiskit Fall Fest 2026, Phase 1.<br>
+**Team name:** _ByteMyCache_<br>
 **AI assistance disclosure:** AI tools assisted with design exploration, coding, debugging, and documentation. The team reviewed and remains responsible for the submitted work. See [`docs/ai/`](docs/ai/) for architecture decisions, issue tracking, and the engineering methodology record.
+
+---
 
 ## Problem summary
 Build a messaging / file-transfer demo whose key establishment and authentication survive a quantum adversary: ML-KEM for the key,
@@ -65,7 +65,7 @@ The Phase 1 Challenge Kit requires modeling Processors A and B as hardware quali
 `results/` includes the classical baseline, protocol-size estimates, the Platform D chunk sweep, and verified PQC benchmark measurements. The test suite has been executed top-to-bottom with verified FIPS 203/204 cryptography via `pqcrypto` (and drop-in `liboqs` support). All benchmark tables (`pqc_benchmark.csv`, `headline_comparison.csv`), MITM attack scenarios (`mitm_demo.csv`), and quantum architecture probes across Processors A, B, and D are fully verified, measured results with zero fallback mocks.
 
 ### Automated Test Suite Verification (pytest)
-The complete automated unit and integration test suite (`pytest tests/ -v`) passes with **100% verification**:
+The complete automated unit and integration test suite (`pytest tests/ -v`) passes with **100% verification** (machine-readable test artifacts: [`test_results.json`](results/tables/test_results.json), [`test_results.xml`](results/tables/test_results.xml)):
 
 | Test Module | Tests | Status | Scope / Focus Area |
 | :--- | :---: | :---: | :--- |
@@ -76,7 +76,7 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 | `tests/test_metrics_and_reporting.py` | 4 | `PASSED` | Statistical summarization (median, p95, mean, std), parameter set availability, and code-size auditing. |
 | **Total** | **49** | **49 / 49 (100%)** | **Execution time: ~3.1s (0 failures, 0 errors, 0 skipped)** |
 
-*Machine-readable test artifacts:* [`test_results.json`](results/tables/test_results.json) and [`test_results.xml`](results/tables/test_results.xml)
+---
 
 ### Deliverables & Verification Checklist
 
