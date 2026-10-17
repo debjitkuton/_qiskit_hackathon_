@@ -1,6 +1,5 @@
 # PS-P1: Quantum-Safe Secure Channel
 
-[![CI Test Suite](https://github.com/debjitkuton/_qiskit_hackathon_/actions/workflows/ci.yml/badge.svg)](https://github.com/debjitkuton/_qiskit_hackathon_/actions/workflows/ci.yml)
 [![pytest](https://img.shields.io/badge/pytest-49%2F49%20passed%20(100%25)-brightgreen?style=flat-square)](results/tables/test_results.xml)
 [![NIST](https://img.shields.io/badge/NIST-FIPS%20203%20%7C%20FIPS%20204-blue?style=flat-square)](https://csrc.nist.gov/projects/post-quantum-cryptography)
 [![Payload](https://img.shields.io/badge/Payload-AES--256--GCM-purple?style=flat-square)](src/process.py)
