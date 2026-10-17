@@ -60,34 +60,6 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 *Machine-readable test artifacts: [`results/tables/test_results.json`](results/tables/test_results.json), [`results/tables/test_results.xml`](results/tables/test_results.xml)*.
 
 
-## Phase 1 Qualification Equations
-
-The following core mathematical formulations from `/assets` underpin the universal Phase 1 qualification deliverables and quantum processor topology analysis:
-
-### 1. Single-Qubit State & Normalization
-![Single-Qubit State](assets/eq_qubit_state.png)
-*Single-qubit superposition in the computational basis constrained by unitary normalization ($|\alpha|^2 + |\beta|^2 = 1$).*
-
-### 2. Maximally Entangled Bell State
-![Bell State](assets/eq_bell_state.png)
-*Canonical two-qubit maximally entangled $|\Phi^+\rangle$ state generated via Hadamard and CNOT gates.*
-
-### 3. Two-Qubit Parity / ZZ Expectation Value
-![ZZ Expectation Value](assets/eq_zz_expectation.png)
-*Two-qubit parity expectation value evaluated directly from projective measurement shot counts in the computational basis.*
-
-### 4. Bell State Fidelity
-![Bell State Fidelity](assets/eq_bell_fidelity.png)
-*Overlap fidelity of an experimentally prepared density matrix $\rho$ with respect to the ideal target Bell state $|\Phi^+\rangle$.*
-
-### 5. Standard Error of Measurement & Parity
-![Standard Error](assets/eq_standard_error.png)
-*General sample mean standard error alongside the shot-noise standard error for the two-qubit parity observable across $N$ measurement shots.*
-
-### 6. Processor Coupling Graph Metrics
-![Coupling Graph Metrics](assets/eq_graph.png)
-*Processor coupling graph representation $G=(V, E)$, defining the average shortest path length $\bar{d}$ and diameter $\mathrm{diam}(G)$ that govern SWAP routing overhead.*
-
 ## Layout
 ```
 project/
