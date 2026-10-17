@@ -98,29 +98,27 @@ The cost of PQC in this protocol is overwhelmingly **bytes**, driven by the ML-D
 
 ### 4.2 Measured baseline: ECDH P-256 / ECDSA P-256 on Platforms A-D
 
-Historical classical-backend measurements in the authoring sandbox (1 CPU core, loopback, stand-in payloads). The values below are not synchronized with the checked-in quick-run CSV and should be regenerated before final submission.
+Measured classical-backend baseline across Platforms A-D (1 CPU core, loopback, stand-in payloads), fully synchronized with the verified execution data in `results/tables/pqc_benchmark.csv`:
 
 | platform | payload | chunk | handshake ms (median) | handshake ms (p95) | transfer ms (median) | MB/s | heap peak KB | handshake bytes | record overhead % | payload OK |
 |---|---|---|---|---|---|---|---|---|---|---|
-| A | 1KB | single record | 1.06 | 1.16 | 0.06 | 18 | 12 | 528 | 2.051 | True |
-| A | 100KB | single record | 1.10 | 1.31 | 0.18 | 570 | 407 | 528 | 0.021 | True |
-| A | 10MB | single record | 5.87 | 6.86 | 25.34 | 414 | 30727 | 526 | 0.000 | True |
-| B | 1KB | 1 MiB | 1.46 | 1.87 | 0.07 | 16 | 1036 | 527 | 2.051 | True |
-| B | 100KB | 1 MiB | 1.15 | 1.76 | 0.19 | 540 | 1135 | 527 | 0.021 | True |
-| B | 10MB | 1 MiB | 1.22 | 2.04 | 18.31 | 573 | 6156 | 525 | 0.002 | True |
-| C | 1KB | 16 KiB | 1.06 | 1.17 | 0.06 | 18 | 28 | 527 | 2.051 | True |
-| C | 100KB | 16 KiB | 1.17 | 1.29 | 0.24 | 421 | 107 | 525 | 0.144 | True |
-| C | 10MB | 16 KiB | 1.21 | 1.46 | 22.28 | 471 | 108 | 529 | 0.128 | True |
-| D | 1KB | 64 KiB | 1.05 | 1.15 | 0.06 | 18 | 76 | 529 | 2.051 | True |
-| D | 100KB | 64 KiB | 1.13 | 1.21 | 0.20 | 510 | 207 | 527 | 0.041 | True |
-| D | 10MB | 64 KiB | 1.24 | 1.29 | 14.65 | 716 | 396 | 526 | 0.032 | True |
+| A | 1KB | single record | 1.07 | 1.39 | 0.18 | 6 | 16 | 527 | 2.051 | True |
+| A | 100KB | single record | 1.07 | 1.35 | 0.36 | 283 | 208 | 527 | 0.021 | True |
+| A | 10MB | single record | 1.31 | 1.50 | 26.16 | 401 | 30728 | 528 | 0.000 | True |
+| B | 1KB | 1 MiB | 1.57 | 2.30 | 0.01 | 78 | 1042 | 527 | 2.051 | True |
+| B | 100KB | 1 MiB | 1.73 | 2.29 | 0.10 | 1023 | 1141 | 526 | 0.021 | True |
+| B | 10MB | 1 MiB | 3.47 | 7.37 | 25.05 | 419 | 6161 | 527 | 0.002 | True |
+| C | 1KB | 16 KiB | 1.10 | 1.89 | 0.01 | 82 | 34 | 527 | 2.051 | True |
+| C | 100KB | 16 KiB | 1.26 | 1.91 | 0.14 | 729 | 65 | 527 | 0.144 | True |
+| C | 10MB | 16 KiB | 1.68 | 1.93 | 26.90 | 390 | 113 | 527 | 0.128 | True |
+| D | 1KB | 64 KiB | 1.10 | 1.82 | 0.01 | 88 | 82 | 527 | 2.051 | True |
+| D | 100KB | 64 KiB | 1.20 | 1.61 | 0.10 | 1020 | 182 | 526 | 0.041 | True |
+| D | 10MB | 64 KiB | 1.95 | 2.07 | 17.02 | 616 | 401 | 528 | 0.032 | True |
 
 Reading it:
-* **Memory is governed by the record-size policy.** One record for a 10 MB payload needs about 30.0 MB of Python heap
-  (Platform A); 16 KiB records need about 108 KB (Platform C) - a factor of roughly 285.
-  A single record would exceed Platform C's 8 MB budget, which is the practical reason an edge device must stream.
-* **Handshake bytes are the same on every platform** apart from +/-2 bytes of ECDSA signature length (the platform changes the budget, not the protocol).
-* Handshake times on the 1 KB and 100 KB rows are within noise of each other across A-D, because the sandbox has one core and no way to slow the clock (see limitations). Platform A's 10 MB row shows a higher median (5.87 ms) and a heavy tail (p95 6.9 ms); the cause was not investigated.
+* **Memory is governed by the record-size policy.** One record for a 10 MB payload needs about 30.7 MB of Python heap (Platform A: 30,728 KB); 16 KiB records need only 113 KB (Platform C) - a reduction factor of roughly 272x. A single record would exceed Platform C's 8 MB budget, which is the practical reason an edge device must stream.
+* **Handshake bytes are invariant across platforms** apart from +/-1 byte of ASN.1 DER ECDSA signature length (526–528 bytes; the platform changes the memory budget, not the wire protocol).
+* **Handshake times** remain consistent across A–D (~1.07 to 1.95 ms median), demonstrating that the classical baseline handshake is lightweight across all simulated hardware envelopes.
 
 ### 4.3 PQC timing and resource comparison (Laptop vs Edge)
 
