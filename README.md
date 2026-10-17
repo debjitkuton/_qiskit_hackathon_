@@ -69,7 +69,7 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 | `tests/test_metrics_and_reporting.py` | 4 | `PASSED` | Statistical summarization (median, p95, mean, std), parameter set availability, and code-size auditing. |
 | **Total** | **49** | **49 / 49 (100%)** | **Execution time: ~3.1s (0 failures, 0 errors, 0 skipped)** |
 
-*Machine-readable test artifacts: [`results/tables/test_results.json`](results/tables/test_results.json), [`results/tables/test_results.xml`](results/tables/test_results.xml)*.
+*Machine-readable test artifacts:* [`test_results.json`](results/tables/test_results.json) and [`test_results.xml`](results/tables/test_results.xml)
 
 ### Deliverables & Verification Checklist
 
