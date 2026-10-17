@@ -73,14 +73,12 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 
 ### Deliverables & Verification Checklist
 
-| Track Requirement | Deliverable Implementation | Verification Artifact | Status |
-| :--- | :--- | :--- | :---: |
-| **Post-Quantum Cryptography** | NIST FIPS 203 (ML-KEM-768) & FIPS 204 (ML-DSA-65) | [`src/process.py`](src/process.py), [`results/tables/pqc_benchmark.csv`](results/tables/pqc_benchmark.csv) | **Verified** |
-| **Classical & Hybrid Comparison** | Classical ECDH P-256 baseline and hybrid ML-KEM/ECDH key exchange | [`src/problem.py`](src/problem.py), [`results/tables/headline_comparison.csv`](results/tables/headline_comparison.csv) | **Verified** |
-| **Resource & Streaming Optimization** | 64 KiB record streaming on Platform D (651 MB/s throughput, 401 KB peak heap) | [`processors/platform_D.json`](processors/platform_D.json), [`results/tables/chunk_sweep.csv`](results/tables/chunk_sweep.csv) | **Verified** |
-| **Adversarial MITM Protection** | 7 attack vectors evaluated with 100% detection rate | [`tests/test_mitm_adversary.py`](tests/test_mitm_adversary.py), [`results/tables/mitm_demo.csv`](results/tables/mitm_demo.csv) | **Verified** |
-| **Quantum Hardware Modeling** | Required Processors A/B topology maps + zero-SWAP Processor D design | [`processors/processor_A.json`](processors/processor_A.json), [`processors/processor_B.json`](processors/processor_B.json), [`results/tables/architecture_probe.csv`](results/tables/architecture_probe.csv) | **Verified** |
-| **Automated Verification Suite** | 49 unit and integration test cases covering crypto, routing, and platforms | [`tests/`](tests/), [`results/tables/test_results.json`](results/tables/test_results.json) | **49/49 PASSED** |
+- [x] **Post-Quantum Cryptography (FIPS 203 & 204):** Verified reference implementations of ML-KEM-768 and ML-DSA-65 via `pqcrypto` and `liboqs` with fail-closed security ([`src/process.py`](src/process.py), [`results/tables/pqc_benchmark.csv`](results/tables/pqc_benchmark.csv)).
+- [x] **Classical Baseline & Hybrid Key Exchange:** Full comparative benchmarking against classical ECDH P-256 and hybrid PQC/classical key exchange ([`src/problem.py`](src/problem.py), [`results/tables/headline_comparison.csv`](results/tables/headline_comparison.csv)).
+- [x] **Streaming Memory Budgeting:** 64 KiB record-size optimization on custom Platform D delivering 651 MB/s throughput within an 8 MB RAM envelope ($272\times$ heap reduction) ([`processors/platform_D.json`](processors/platform_D.json), [`results/tables/chunk_sweep.csv`](results/tables/chunk_sweep.csv)).
+- [x] **Adversarial MITM Defense Suite:** 7 attack vectors evaluated with 100% detection rate across all parameter sets ([`tests/test_mitm_adversary.py`](tests/test_mitm_adversary.py), [`results/tables/mitm_demo.csv`](results/tables/mitm_demo.csv)).
+- [x] **Quantum Architecture Modeling & Custom Design:** Required Processors A and B maps plus team-designed Processor D ($3\times3$ grid) achieving zero-SWAP GHZ-5 routing ([`processors/processor_A.json`](processors/processor_A.json), [`processors/processor_B.json`](processors/processor_B.json), [`results/tables/architecture_probe.csv`](results/tables/architecture_probe.csv)).
+- [x] **Automated Test Suite:** 49 unit and integration test cases covering crypto, routing, adversaries, and platforms with 100% pass rate ([`tests/`](tests/), [`results/tables/test_results.json`](results/tables/test_results.json)).
 
 
 ## Layout
