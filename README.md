@@ -7,7 +7,7 @@
 
 **Problem ID / title:** PS-P1 - Quantum-Safe Secure Channel (Post-Quantum Cryptography track), Qiskit Fall Fest 2026, Phase 1.<br>
 **Team name:** _ByteMyCache_<br>
-**AI assistance disclosure:** AI tools assisted with design exploration, coding, debugging, and documentation. The team reviewed and remains responsible for the submitted work. See [`docs/ai/`](docs/ai/) for architecture decisions, issue tracking, and the engineering methodology record.
+**AI assistance disclosure:** AI tools assisted with design exploration, coding, debugging, and documentation. The team reviewed and remains responsible for the submitted work. Architecture decisions, issue tracking, and session summaries are documented in [**docs/ai/**](docs/ai/) &nbsp;|&nbsp; [**docs/ai/prompts.md**](docs/ai/prompts.md).
 
 ---
 
@@ -65,7 +65,7 @@ The Phase 1 Challenge Kit requires modeling Processors A and B as hardware quali
 `results/` includes the classical baseline, protocol-size estimates, the Platform D chunk sweep, and verified PQC benchmark measurements. The test suite has been executed top-to-bottom with verified FIPS 203/204 cryptography via `pqcrypto` (and drop-in `liboqs` support). All benchmark tables (`pqc_benchmark.csv`, `headline_comparison.csv`), MITM attack scenarios (`mitm_demo.csv`), and quantum architecture probes across Processors A, B, and D are fully verified, measured results with zero fallback mocks.
 
 ### Automated Test Suite Verification (pytest)
-The complete automated unit and integration test suite (`pytest tests/ -v`) passes with **100% verification** (machine-readable test artifacts: [`test_results.json`](results/tables/test_results.json), [`test_results.xml`](results/tables/test_results.xml)):
+The complete automated unit and integration test suite (`pytest tests/ -v`) passes with **100% verification**:
 
 | Test Module | Tests | Status | Scope / Focus Area |
 | :--- | :---: | :---: | :--- |
@@ -75,6 +75,8 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 | `tests/test_platforms.py` | 8 | `PASSED` | Target platforms A/B/C/D CPU and memory budgets, JSON configuration validity, and deterministic payload stand-ins (1KB, 100KB, 10MB). |
 | `tests/test_metrics_and_reporting.py` | 4 | `PASSED` | Statistical summarization (median, p95, mean, std), parameter set availability, and code-size auditing. |
 | **Total** | **49** | **49 / 49 (100%)** | **Execution time: ~3.1s (0 failures, 0 errors, 0 skipped)** |
+
+> 📊 **Machine-Readable Test Reports:** [![JSON Report](https://img.shields.io/badge/Report-test__results.json-blue?style=flat-square)](results/tables/test_results.json) [![XML Report](https://img.shields.io/badge/Report-test__results.xml-blue?style=flat-square)](results/tables/test_results.xml) &nbsp;&bull;&nbsp; [**`results/tables/test_results.json`**](results/tables/test_results.json) &nbsp;|&nbsp; [**`results/tables/test_results.xml`**](results/tables/test_results.xml)
 
 ---
 
