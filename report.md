@@ -13,7 +13,7 @@ Qiskit Fall Fest 2026, Phase 1, Post-Quantum Cryptography track.
 | Laptop vs edge comparison | Measured latency and memory scaling across laptop (Platform A) and edge (Platform C/D), demonstrating 271x heap reduction via streaming. |
 | Processors A, B, and D (qualification & proposed design) | Required files use the final-kit 5-qubit chain (A) and 9-qubit sparse graph (B). Processor D (3x3 grid) designed and proven to achieve 0 SWAPs and superior fidelity. |
 | Automated test suite (pytest) | 49/49 verified passing (0 failures, 100% pass rate) across 5 test modules covering crypto backends, MITM defenses, quantum topologies, and platforms in ~3.1s. |
-| AI collaboration & decision records | Prompt log and decision records are documented under `docs/ai/`; all design decisions fully traceable. |
+| AI collaboration & decision records | Engineering methodology and architecture decision records are documented under `docs/ai/`; all design decisions fully traceable. |
 
 ## 1. Threat model and security goals
 
