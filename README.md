@@ -7,7 +7,7 @@
 [![Qiskit](https://img.shields.io/badge/Qiskit-1.x-613399?style=flat-square)](src/routing.py)
 
 **Problem ID / title:** PS-P1 - Quantum-Safe Secure Channel (Post-Quantum Cryptography track), Qiskit Fall Fest 2026, Phase 1.
-**Team members:** _ByteMyCache_
+**Team name:** _ByteMyCache_
 **AI assistance disclosure:** AI tools assisted with design exploration, coding, debugging, and documentation. The team reviewed and remains responsible for the submitted work. See [`docs/ai/`](docs/ai/) for the prompt log, decisions, issues, and retrospective.
 
 ## Problem summary
