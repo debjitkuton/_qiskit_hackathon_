@@ -9,7 +9,7 @@
 **Problem ID / title:** PS-P1 - Quantum-Safe Secure Channel (Post-Quantum Cryptography track), Qiskit Fall Fest 2026, Phase 1.<br>
 **Team name:** _ByteMyCache_<br>
 **AI assistance disclosure:** AI tools assisted with design exploration, coding, debugging, and documentation. The team reviewed and remains responsible for the submitted work.<br>
-📁 **AI Documentation & Audit Logs:** [![AI Docs](https://img.shields.io/badge/AI%20Docs-docs%2Fai-blue?style=flat-square)](docs/ai/) [![Prompt Log](https://img.shields.io/badge/Prompt%20Log-prompts.md-purple?style=flat-square)](docs/ai/prompts.md) &nbsp;&bull;&nbsp; [**`docs/ai/`**](docs/ai/) &nbsp;|&nbsp; [**`docs/ai/prompts.md`**](docs/ai/prompts.md)
+📁 **AI Documentation & Audit Logs:** [![AI Docs](https://img.shields.io/badge/AI%20Docs-docs%2Fai-blue?style=flat-square)](docs/ai/) [![Prompt Log](https://img.shields.io/badge/Prompt%20Log-prompts.md-purple?style=flat-square)](docs/ai/prompts.md) [**`docs/ai/`**](docs/ai/) [**`docs/ai/prompts.md`**](docs/ai/prompts.md)
 
 ---
 
@@ -78,7 +78,7 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 | `tests/test_metrics_and_reporting.py` | 4 | `PASSED` | Statistical summarization (median, p95, mean, std), parameter set availability, and code-size auditing. |
 | **Total** | **49** | **49 / 49 (100%)** | **Execution time: ~3.1s (0 failures, 0 errors, 0 skipped)** |
 
-> 📊 **Machine-Readable Test Reports:** [![JSON Report](https://img.shields.io/badge/Report-test__results.json-blue?style=flat-square)](results/tables/test_results.json) [![XML Report](https://img.shields.io/badge/Report-test__results.xml-blue?style=flat-square)](results/tables/test_results.xml) &nbsp;&bull;&nbsp; [**`results/tables/test_results.json`**](results/tables/test_results.json) &nbsp;|&nbsp; [**`results/tables/test_results.xml`**](results/tables/test_results.xml)
+> 📊 **Machine-Readable Test Reports:** [![JSON Report](https://img.shields.io/badge/Report-test__results.json-blue?style=flat-square)](results/tables/test_results.json) [![XML Report](https://img.shields.io/badge/Report-test__results.xml-blue?style=flat-square)](results/tables/test_results.xml) [**`results/tables/test_results.json`**](results/tables/test_results.json) [**`results/tables/test_results.xml`**](results/tables/test_results.xml)
 
 ---
 
