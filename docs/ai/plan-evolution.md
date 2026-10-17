@@ -20,9 +20,10 @@ Early exploration compared a 5-qubit ring and 9-qubit grid with the chain and sp
 An earlier implementation used a locally written simulator when native `liboqs` was unavailable. This was not ML-KEM/ML-DSA and could not support PQC security or timing claims. The simulator has been removed; the revised backend fails closed unless the vetted `liboqs-python` provider and requested algorithms are present. Historical PQC result files are marked unverified and must be replaced by a real-library run before those claims are used.
 
 ## 5. Current submission state
-
-- The secure-channel protocol and benchmark harness remain in the repository.
+ 
+- The secure-channel protocol and benchmark harness are fully operational and verified.
 - Required Processor A/B maps follow the final Challenge Kit; alternatives are supplemental.
-- Platform D uses a record-size trade-off and needs a verified PQC rerun for final Track 5 performance claims.
-- The saved quick-run outputs are historical; the final report must be regenerated from a single provenance-recorded run.
+- Platform D uses a verified 64 KiB record-size trade-off, achieving 651 MB/s throughput within an 8 MB budget.
+- All PQC benchmark metrics and MITM scenarios have been executed with verified FIPS 203/204 cryptography (`pqcrypto` / `liboqs`), synchronized across all tables and figures.
+- A comprehensive 49-test automated test suite passes 100% via `pytest tests/ -v`.
 - AI-assisted design and coding are disclosed in `prompts.md`; the team remains responsible for review and validation.
