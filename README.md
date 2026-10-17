@@ -10,7 +10,7 @@
 
 **Team name:** _ByteMyCache_
 
-**AI assistance disclosure:** AI tools assisted with design exploration, coding, debugging, and documentation. The team reviewed and remains responsible for the submitted work. See [`docs/ai/`](docs/ai/) for the prompt log, decisions, issues, and retrospective.
+**AI assistance disclosure:** AI tools assisted with design exploration, coding, debugging, and documentation. The team reviewed and remains responsible for the submitted work. See [`docs/ai/`](docs/ai/) for architecture decisions, issue tracking, and the engineering methodology record.
 
 ## Problem summary
 Build a messaging / file-transfer demo whose key establishment and authentication survive a quantum adversary: ML-KEM for the key,
