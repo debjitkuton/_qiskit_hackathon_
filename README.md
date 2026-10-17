@@ -4,10 +4,12 @@
 [![NIST](https://img.shields.io/badge/NIST-FIPS%20203%20%7C%20FIPS%20204-blue?style=flat-square)](https://csrc.nist.gov/projects/post-quantum-cryptography)
 [![Payload](https://img.shields.io/badge/Payload-AES--256--GCM-purple?style=flat-square)](src/process.py)
 [![Qiskit](https://img.shields.io/badge/Qiskit-1.x-613399?style=flat-square)](src/routing.py)
+[![AI Disclosure](https://img.shields.io/badge/AI%20Disclosure-docs%2Fai-informational?style=flat-square)](docs/ai/)
 
 **Problem ID / title:** PS-P1 - Quantum-Safe Secure Channel (Post-Quantum Cryptography track), Qiskit Fall Fest 2026, Phase 1.<br>
 **Team name:** _ByteMyCache_<br>
-**AI assistance disclosure:** AI tools assisted with design exploration, coding, debugging, and documentation. The team reviewed and remains responsible for the submitted work. Architecture decisions, issue tracking, and session summaries are documented in [**docs/ai/**](docs/ai/) &nbsp;|&nbsp; [**docs/ai/prompts.md**](docs/ai/prompts.md).
+**AI assistance disclosure:** AI tools assisted with design exploration, coding, debugging, and documentation. The team reviewed and remains responsible for the submitted work.<br>
+📁 **AI Documentation & Audit Logs:** [![AI Docs](https://img.shields.io/badge/AI%20Docs-docs%2Fai-blue?style=flat-square)](docs/ai/) [![Prompt Log](https://img.shields.io/badge/Prompt%20Log-prompts.md-purple?style=flat-square)](docs/ai/prompts.md) &nbsp;&bull;&nbsp; [**`docs/ai/`**](docs/ai/) &nbsp;|&nbsp; [**`docs/ai/prompts.md`**](docs/ai/prompts.md)
 
 ---
 
