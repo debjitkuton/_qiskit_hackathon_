@@ -1,30 +1,29 @@
-# Two-Qubit Parity / ZZ Expectation Value
+# Parity Expectation Value $\langle ZZ \rangle$
 
-## Mathematical Formulation
+## Visual Mathematical Formulation
 
-$$\langle ZZ \rangle = \dfrac{N_{00} + N_{11} - N_{01} - N_{10}}{N}$$
+$$\langle ZZ \rangle = \frac{N_{00} + N_{11} - N_{01} - N_{10}}{N}$$
 
-## Rendered Image
+## LaTeX Code
 
-![ZZ Expectation Value](eq_zz_expectation.png)
+```latex
+\langle ZZ \rangle = \frac{N_{00} + N_{11} - N_{01} - N_{10}}{N}
+```
 
-## Generator Code
+## Description & Context
+Calculates the parity expectation value along the computational $Z \otimes Z$ basis from measured shot counts. For an ideal, noise-free Bell pair $|\Phi^{+}\rangle$, $\langle ZZ \rangle = +1.0$. Any deviation from $+1.0$ indicates environmental dephasing, gate errors, or eavesdropper interception along the channel.
+
+## Python Implementation
 
 ```python
-from pathlib import Path
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-
-plt.rcParams.update({"mathtext.fontset": "cm", "font.family": "serif"})
-
-OUT = Path(__file__).resolve().parent / "eq_zz_expectation.png"
-EQUATION = r"""$\langle ZZ \rangle = \dfrac{N_{00} + N_{11} - N_{01} - N_{10}}{N}$"""
-
-fig = plt.figure(figsize=(0.1, 0.1))
-fig.patch.set_facecolor("white")
-fig.text(0, 0, EQUATION, fontsize=26, color="black")
-fig.savefig(OUT, dpi=300, bbox_inches="tight", pad_inches=0.12, facecolor="white")
-plt.close(fig)
-print("wrote", OUT)
+def compute_zz_expectation(counts: dict[str, int]) -> float:
+    """Compute parity expectation <ZZ> from execution measurement counts."""
+    n00 = counts.get("00", 0)
+    n11 = counts.get("11", 0)
+    n01 = counts.get("01", 0)
+    n10 = counts.get("10", 0)
+    total = n00 + n11 + n01 + n10
+    if total == 0:
+        return 0.0
+    return (n00 + n11 - n01 - n10) / total
 ```

@@ -1,30 +1,28 @@
 # Single-Qubit State & Normalization
 
-## Mathematical Formulation
+## Visual Mathematical Formulation
 
 $$|\psi\rangle = \alpha\,|0\rangle + \beta\,|1\rangle,\qquad |\alpha|^{2} + |\beta|^{2} = 1$$
 
-## Rendered Image
+## LaTeX Code
 
-![Single-Qubit State](eq_qubit_state.png)
+```latex
+|\psi\rangle = \alpha\,|0\rangle + \beta\,|1\rangle,\qquad |\alpha|^{2} + |\beta|^{2} = 1
+```
 
-## Generator Code
+## Description & Context
+Represents an arbitrary single-qubit quantum state as a coherent superposition of computational basis states $|0\rangle$ and $|1\rangle$, subject to the unitary normalization condition where the sum of measurement probabilities equals 1. Used in single-qubit channel qualification and state preparation.
+
+## Qiskit Implementation
 
 ```python
-from pathlib import Path
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+from qiskit import QuantumCircuit
+import numpy as np
 
-plt.rcParams.update({"mathtext.fontset": "cm", "font.family": "serif"})
+# Prepare an arbitrary normalized single-qubit state
+alpha = 1.0 / np.sqrt(2)
+beta = 1.0 / np.sqrt(2)
 
-OUT = Path(__file__).resolve().parent / "eq_qubit_state.png"
-EQUATION = r"""$|\psi\rangle = \alpha\,|0\rangle + \beta\,|1\rangle,\qquad |\alpha|^{2} + |\beta|^{2} = 1$"""
-
-fig = plt.figure(figsize=(0.1, 0.1))
-fig.patch.set_facecolor("white")
-fig.text(0, 0, EQUATION, fontsize=26, color="black")
-fig.savefig(OUT, dpi=300, bbox_inches="tight", pad_inches=0.12, facecolor="white")
-plt.close(fig)
-print("wrote", OUT)
+qc = QuantumCircuit(1)
+qc.initialize([alpha, beta], 0)
 ```

@@ -67,6 +67,6 @@ project/
 ├── docs/ai/ (adrs.md, issues.md, patterns.md, plan-evolution.md, postmortem.md, prompts.md)
 ├── data/{raw,processed}/   processors/ (processor_A.json, processor_B.json, platform_A-D.json)
 ├── src/ (problem.py process.py routing.py metrics.py visualization.py)
-└── results/{tables,figures,archive_unverified}/   assets/ (eq_*.png)
+└── results/{tables,figures,archive_unverified}/   assets/ (eq_*.md)
 ```
 

@@ -1,30 +1,25 @@
-# Maximally Entangled Bell State
+# Bell State $|\Phi^{+}\rangle$
 
-## Mathematical Formulation
+## Visual Mathematical Formulation
 
-$$|\Phi^{+}\rangle = \dfrac{|00\rangle + |11\rangle}{\sqrt{2}}$$
+$$|\Phi^{+}\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle)$$
 
-## Rendered Image
+## LaTeX Code
 
-![Bell State](eq_bell_state.png)
+```latex
+|\Phi^{+}\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle)
+```
 
-## Generator Code
+## Description & Context
+Represents the canonical maximally entangled two-qubit Bell state $|\Phi^{+}\rangle$. In our quantum-safe secure communication pipeline, Bell pairs form the foundation of entanglement-assisted key distribution and quantum parity verification across untrusted relays.
+
+## Qiskit Implementation
 
 ```python
-from pathlib import Path
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+from qiskit import QuantumCircuit
 
-plt.rcParams.update({"mathtext.fontset": "cm", "font.family": "serif"})
-
-OUT = Path(__file__).resolve().parent / "eq_bell_state.png"
-EQUATION = r"""$|\Phi^{+}\rangle = \dfrac{|00\rangle + |11\rangle}{\sqrt{2}}$"""
-
-fig = plt.figure(figsize=(0.1, 0.1))
-fig.patch.set_facecolor("white")
-fig.text(0, 0, EQUATION, fontsize=26, color="black")
-fig.savefig(OUT, dpi=300, bbox_inches="tight", pad_inches=0.12, facecolor="white")
-plt.close(fig)
-print("wrote", OUT)
+# Generate maximally entangled Bell state |Phi+>
+qc = QuantumCircuit(2)
+qc.h(0)
+qc.cx(0, 1)
 ```

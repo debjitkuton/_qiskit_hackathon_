@@ -1,30 +1,29 @@
 # Processor Coupling Graph Metrics
 
-## Mathematical Formulation
+## Visual Mathematical Formulation
 
 $$G = (V, E),\qquad \bar{d} = \dfrac{2}{n(n-1)}\sum_{i<j} d(i,j),\qquad \mathrm{diam}(G) = \max_{i,j}\, d(i,j)$$
 
-## Rendered Image
+## LaTeX Code
 
-![Coupling Graph Metrics](eq_graph.png)
+```latex
+G = (V, E),\qquad \bar{d} = \dfrac{2}{n(n-1)}\sum_{i<j} d(i,j),\qquad \mathrm{diam}(G) = \max_{i,j}\, d(i,j)
+```
 
-## Generator Code
+## Description & Context
+Defines hardware connectivity topology metrics for quantum processor coupling graphs $G=(V, E)$, including average shortest path length $\bar{d}$ and network diameter $\mathrm{diam}(G)$. These metrics directly dictate circuit routing overhead, determining the minimum number of SWAP gates required to entangle non-adjacent physical qubits.
+
+## NetworkX Implementation
 
 ```python
-from pathlib import Path
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+import networkx as nx
 
-plt.rcParams.update({"mathtext.fontset": "cm", "font.family": "serif"})
-
-OUT = Path(__file__).resolve().parent / "eq_graph.png"
-EQUATION = r"""$G = (V, E),\qquad \bar{d} = \dfrac{2}{n(n-1)}\sum_{i<j} d(i,j),\qquad \mathrm{diam}(G) = \max_{i,j}\, d(i,j)$"""
-
-fig = plt.figure(figsize=(0.1, 0.1))
-fig.patch.set_facecolor("white")
-fig.text(0, 0, EQUATION, fontsize=26, color="black")
-fig.savefig(OUT, dpi=300, bbox_inches="tight", pad_inches=0.12, facecolor="white")
-plt.close(fig)
-print("wrote", OUT)
+def calculate_topology_metrics(coupling_graph: nx.Graph) -> dict[str, float]:
+    """Calculate average shortest path length and diameter for a coupling graph."""
+    return {
+        "nodes": coupling_graph.number_of_nodes(),
+        "edges": coupling_graph.number_of_edges(),
+        "average_shortest_path_length": nx.average_shortest_path_length(coupling_graph),
+        "diameter": nx.diameter(coupling_graph),
+    }
 ```
