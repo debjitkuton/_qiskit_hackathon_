@@ -10,3 +10,6 @@ psutil>=5.9
 # Optional (quantum threat module only; not needed for the core channel)
 # qiskit>=1.2
 # qiskit-aer>=0.15
+
+# Testing & QA
+pytest>=8.0

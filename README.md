@@ -18,6 +18,7 @@ Flow diagram: `results/figures/handshake_flow.png`. Details and measured results
 ## Environment and execution
 ```
 pip install -r requirements.txt
+pytest tests/ -v                                               # run automated test suite (49 passing tests)
 python -m src.process selftest --param-set classical-p256     # classical ECDH P-256 baseline
 python -m src.process selftest --param-set pqc-L3              # ML-KEM-768 + ML-DSA-65
 python -m src.process selftest --param-set hybrid-L3           # ECDH P-256 + ML-KEM-768, ML-DSA-65
