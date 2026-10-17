@@ -23,7 +23,7 @@ authenticated sequence numbers. Exact parameter sets are in `src/problem.py` and
 Flow diagram: `results/figures/handshake_flow.png`. Details and measured results: **`report.md`**.
 
 ## Environment and execution
-```
+```bash
 pip install -r requirements.txt
 pytest tests/ -v                                               # run automated test suite (49 passing tests)
 python -m src.process selftest --param-set classical-p256     # classical ECDH P-256 baseline
@@ -86,4 +86,3 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 - [x] **MITM Defense Suite:** 7 attack scenarios validated with 100% detection.
 - [x] **Quantum Qualification:** Full transpilation, routing analysis, and noise simulation for Processors A, B, and D.
 - [x] **Automated Testing:** 49/49 passing pytest unit & integration tests (`pytest tests/`).
-
