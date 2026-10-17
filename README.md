@@ -73,12 +73,12 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 
 ### Deliverables & Verification Checklist
 
-- [x] **Post-Quantum Cryptography (FIPS 203 & 204):** Verified reference implementations of ML-KEM-768 and ML-DSA-65 via `pqcrypto` and `liboqs` with fail-closed security ([`src/process.py`](src/process.py), [`results/tables/pqc_benchmark.csv`](results/tables/pqc_benchmark.csv)).
-- [x] **Classical Baseline & Hybrid Key Exchange:** Full comparative benchmarking against classical ECDH P-256 and hybrid PQC/classical key exchange ([`src/problem.py`](src/problem.py), [`results/tables/headline_comparison.csv`](results/tables/headline_comparison.csv)).
-- [x] **Streaming Memory Budgeting:** 64 KiB record-size optimization on custom Platform D delivering 651 MB/s throughput within an 8 MB RAM envelope ($272\times$ heap reduction) ([`processors/platform_D.json`](processors/platform_D.json), [`results/tables/chunk_sweep.csv`](results/tables/chunk_sweep.csv)).
-- [x] **Adversarial MITM Defense Suite:** 7 attack vectors evaluated with 100% detection rate across all parameter sets ([`tests/test_mitm_adversary.py`](tests/test_mitm_adversary.py), [`results/tables/mitm_demo.csv`](results/tables/mitm_demo.csv)).
-- [x] **Quantum Architecture Modeling & Custom Design:** Required Processors A and B maps plus team-designed Processor D ($3\times3$ grid) achieving zero-SWAP GHZ-5 routing ([`processors/processor_A.json`](processors/processor_A.json), [`processors/processor_B.json`](processors/processor_B.json), [`results/tables/architecture_probe.csv`](results/tables/architecture_probe.csv)).
-- [x] **Automated Test Suite:** 49 unit and integration test cases covering crypto, routing, adversaries, and platforms with 100% pass rate ([`tests/`](tests/), [`results/tables/test_results.json`](results/tables/test_results.json)).
+- [x] **FIPS 203 / FIPS 204 Cryptography:** Verified implementations via `pqcrypto` and `liboqs`.
+- [x] **Classical Baseline & Hybrid:** ECDH P-256 baseline and hybrid ML-KEM-768/ECDH key exchange.
+- [x] **Streaming Memory Budgeting:** 64 KiB record optimization on Platform D (651 MB/s throughput within 8 MB RAM).
+- [x] **MITM Defense Suite:** 7 attack scenarios validated with 100% detection.
+- [x] **Quantum Qualification:** Full transpilation, routing analysis, and noise simulation for Processors A, B, and D.
+- [x] **Automated Testing:** 49/49 passing pytest unit & integration tests (`pytest tests/`).
 
 
 ## Layout
