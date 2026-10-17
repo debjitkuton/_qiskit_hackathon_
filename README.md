@@ -45,6 +45,20 @@ Processor A and B are separate Phase 1 architecture/qualification artifacts; the
 ## Results
 `results/` includes the classical baseline, protocol-size estimates, the Platform D chunk sweep, and verified PQC benchmark measurements. The test suite has been executed top-to-bottom with verified FIPS 203/204 cryptography via `pqcrypto` (and drop-in `liboqs` support). All benchmark tables (`pqc_benchmark.csv`, `headline_comparison.csv`), MITM attack scenarios (`mitm_demo.csv`), and quantum architecture probes across Processors A, B, and D are fully verified, measured results with zero fallback mocks.
 
+### Automated Test Suite Verification (pytest)
+The complete automated unit and integration test suite (`pytest tests/ -v`) passes with **100% verification**:
+
+| Test Module | Tests | Status | Scope / Focus Area |
+| :--- | :---: | :---: | :--- |
+| `tests/test_crypto_channel.py` | 17 | `PASSED` | KEM keygen/encaps/decaps, signature keygen/sign/verify, wire packing, loopback transfer, and TCP demo across `classical-p256`, `pqc-L3` (FIPS 203 ML-KEM-768 + FIPS 204 ML-DSA-65), and `hybrid-L3`. |
+| `tests/test_mitm_adversary.py` | 10 | `PASSED` | All 7 adversary attack vectors: key swap, ciphertext corruption, forged ServerHello, AEAD bit-flips, record replay, and stream truncation. |
+| `tests/test_quantum_processors.py` | 10 | `PASSED` | Processors A (5-qubit chain), B (9-qubit tree), and D (3×3 grid) topology validation, graph metrics, and Qiskit Aer GHZ-5 probes proving 0 SWAPs on Processor D. |
+| `tests/test_platforms.py` | 8 | `PASSED` | Target platforms A/B/C/D CPU and memory budgets, JSON configuration validity, and deterministic payload stand-ins (1KB, 100KB, 10MB). |
+| `tests/test_metrics_and_reporting.py` | 4 | `PASSED` | Statistical summarization (median, p95, mean, std), parameter set availability, and code-size auditing. |
+| **Total** | **49** | **49 / 49 (100%)** | **Execution time: ~3.1s (0 failures, 0 errors, 0 skipped)** |
+
+*Machine-readable test artifacts: [`results/tables/test_results.json`](results/tables/test_results.json), [`results/tables/test_results.xml`](results/tables/test_results.xml)*.
+
 
 ## Phase 1 Qualification Equations
 

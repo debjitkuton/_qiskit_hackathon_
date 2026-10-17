@@ -12,6 +12,7 @@ Qiskit Fall Fest 2026, Phase 1, Post-Quantum Cryptography track.
 | Platform A/B/C/D benchmark harness | Multi-platform benchmark executed across all 60 parameter-platform-payload combinations with live RSS and heap telemetry. |
 | Laptop vs edge comparison | Measured latency and memory scaling across laptop (Platform A) and edge (Platform C/D), demonstrating 271x heap reduction via streaming. |
 | Processors A, B, and D (qualification & proposed design) | Required files use the final-kit 5-qubit chain (A) and 9-qubit sparse graph (B). Processor D (3x3 grid) designed and proven to achieve 0 SWAPs and superior fidelity. |
+| Automated test suite (pytest) | 49/49 verified passing (0 failures, 100% pass rate) across 5 test modules covering crypto backends, MITM defenses, quantum topologies, and platforms in ~3.1s. |
 | AI collaboration & decision records | Prompt log and decision records are documented under `docs/ai/`; all design decisions fully traceable. |
 
 ## 1. Threat model and security goals
@@ -275,8 +276,24 @@ The measured state fidelities across 4096 shots (`results/tables/t1_t2_sweep.csv
 
 **Physical Insights from the Coherence Sweep:**
 1. **Low-Coherence Resilience:** In NISQ regimes with short coherence ($T_1 \le 30\,\mu\text{s}$), circuit depth is the single dominant factor in state survival. Because Processor D has a depth of only 8 (compared to 14 on A), qubits spend far less time undergoing decoherence during idle cycles, giving Processor D a marked **$+5.38\%$ fidelity advantage**.
-2. **Asymptotic Convergence:** As $T_1, T_2 \to \infty$, fidelity converges toward the readout error floor ($\approx 95\%$), confirming that routing efficiency is most critical precisely on near-term noisy quantum hardware.
 3. Visualization: see `results/figures/t1_t2_sweep.png`.
+
+### 6.8 Automated Unit & Integration Testing (pytest)
+
+To ensure strict software quality and continuous verification across all components, the repository includes a comprehensive, automated test suite (`tests/`) executable directly via `pytest tests/ -v`.
+
+All 49 unit and integration test cases pass with zero failures:
+
+| Test Module | Test Cases | Result | Verification Scope |
+| :--- | :---: | :---: | :--- |
+| `tests/test_crypto_channel.py` | 17 | **PASSED** | Key generation, KEM encapsulation/decapsulation, mutual signature verification, HKDF key derivation, wire framing, loopback transfer, and localhost multi-threaded TCP demo across `classical-p256`, `pqc-L3`, and `hybrid-L3`. |
+| `tests/test_mitm_adversary.py` | 10 | **PASSED** | Automated verification across all 7 adversary scenarios: control, KEM key swap, KEM ciphertext corruption, forged ServerHello, AEAD bit-flips, record replay, and stream truncation. |
+| `tests/test_quantum_processors.py` | 10 | **PASSED** | Processor A (5Q chain), B (9Q tree), and D (3×3 grid) topology validation, graph metrics, and Qiskit Aer GHZ-5 probes proving 0 SWAPs on Processor D. |
+| `tests/test_platforms.py` | 8 | **PASSED** | Target platforms A/B/C/D CPU and memory budgets, JSON configuration validity, and deterministic payload stand-ins (1KB, 100KB, 10MB). |
+| `tests/test_metrics_and_reporting.py` | 4 | **PASSED** | Statistical summarization (median, p95, mean, std), parameter set availability, and code-size auditing. |
+| **Total** | **49** | **100% Pass** | **Runtime: 3.10s (0 failures, 0 errors, 0 skipped)** |
+
+*Exported test artifacts: [`results/tables/test_results.json`](results/tables/test_results.json) and [`results/tables/test_results.xml`](results/tables/test_results.xml).*
 
 ## 7. Limitations (read before trusting any number)
 

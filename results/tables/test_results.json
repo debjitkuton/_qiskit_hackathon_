@@ -1,0 +1,49 @@
+{
+  "suite": "PS-P1 Quantum-Safe Secure Channel Test Suite",
+  "timestamp_utc": "2026-10-17T10:48:13Z",
+  "environment": {
+    "os": "Windows",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.6"
+  },
+  "summary": {
+    "total": 49,
+    "passed": 49,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 3.1,
+    "pass_rate_pct": 100.0
+  },
+  "modules": [
+    {
+      "file": "tests/test_crypto_channel.py",
+      "tests_count": 17,
+      "passed": 17,
+      "scope": "KEM keygen/encaps/decaps, signature keygen/sign/verify, wire packing, loopback transfer, and TCP demo across classical-p256, pqc-L3 (ML-KEM-768 + ML-DSA-65), and hybrid-L3"
+    },
+    {
+      "file": "tests/test_mitm_adversary.py",
+      "tests_count": 10,
+      "passed": 10,
+      "scope": "Automated verification across all 7 adversary scenarios: control, KEM key swap, KEM ciphertext corruption, forged ServerHello, AEAD bit-flips, record replay, and stream truncation"
+    },
+    {
+      "file": "tests/test_quantum_processors.py",
+      "tests_count": 10,
+      "passed": 10,
+      "scope": "Processor A (5-qubit chain), B (9-qubit sparse), and D (3x3 grid) topology validation, graph metrics, and Qiskit Aer GHZ-5 probes proving 0 SWAPs on Processor D"
+    },
+    {
+      "file": "tests/test_platforms.py",
+      "tests_count": 8,
+      "passed": 8,
+      "scope": "Platforms A, B, C, D CPU/memory/chunk budgets, JSON configuration validity, and deterministic payload stand-ins (1KB, 100KB, 10MB)"
+    },
+    {
+      "file": "tests/test_metrics_and_reporting.py",
+      "tests_count": 4,
+      "passed": 4,
+      "scope": "Statistical summarization (median, p95, mean, std), available parameter set checks, and code-size table generation"
+    }
+  ]
+}
