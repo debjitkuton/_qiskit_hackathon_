@@ -73,7 +73,7 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 
 ### Deliverables & Verification Checklist
 
-- [x] **FIPS 203 / FIPS 204 Cryptography:** Verified implementations via `pqcrypto` and `liboqs`.
+- [x] **FIPS 203 / FIPS 204 Cryptography:** Verified implementations via `pqcrypto` (with drop-in `liboqs` support).
 - [x] **Classical Baseline & Hybrid:** ECDH P-256 baseline and hybrid ML-KEM-768/ECDH key exchange.
 - [x] **Streaming Memory Budgeting:** 64 KiB record optimization on Platform D (651 MB/s throughput within 8 MB RAM).
 - [x] **MITM Defense Suite:** 7 attack scenarios validated with 100% detection.
