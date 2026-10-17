@@ -80,14 +80,3 @@ The complete automated unit and integration test suite (`pytest tests/ -v`) pass
 - [x] **Quantum Qualification:** Full transpilation, routing analysis, and noise simulation for Processors A, B, and D.
 - [x] **Automated Testing:** 49/49 passing pytest unit & integration tests (`pytest tests/`).
 
-
-## Layout
-```
-project/
-├── README.md  report.md  main.ipynb  requirements.txt
-├── docs/ai/ (adrs.md, issues.md, patterns.md, plan-evolution.md, postmortem.md, prompts.md)
-├── data/{raw,processed}/   processors/ (processor_A.json, processor_B.json, platform_A-D.json)
-├── src/ (problem.py process.py routing.py metrics.py visualization.py)
-└── results/{tables,figures,archive_unverified}/   assets/ (eq_*.png)
-```
-
