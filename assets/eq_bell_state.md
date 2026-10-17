@@ -2,13 +2,19 @@
 
 ## Visual Mathematical Formulation
 
-$$|\Phi^{+}\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle)$$
+$$
+|\Phi^{+}\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle)
+$$
 
 ## LaTeX Code
 
 ```latex
 |\Phi^{+}\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle)
 ```
+
+## Rendered Image
+
+![Bell State](images/eq_bell_state.png)
 
 ## Description & Context
 Represents the canonical maximally entangled two-qubit Bell state $|\Phi^{+}\rangle$. In our quantum-safe secure communication pipeline, Bell pairs form the foundation of entanglement-assisted key distribution and quantum parity verification across untrusted relays.

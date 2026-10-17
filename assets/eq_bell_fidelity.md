@@ -2,13 +2,19 @@
 
 ## Visual Mathematical Formulation
 
-$$F = \langle \Phi^{+} | \rho | \Phi^{+} \rangle$$
+$$
+F = \langle \Phi^{+} | \rho | \Phi^{+} \rangle
+$$
 
 ## LaTeX Code
 
 ```latex
 F = \langle \Phi^{+} | \rho | \Phi^{+} \rangle
 ```
+
+## Rendered Image
+
+![Bell State Fidelity](images/eq_bell_fidelity.png)
 
 ## Description & Context
 Measures the state fidelity $F \in [0, 1]$ between an ideal pure target Bell state $|\Phi^{+}\rangle$ and the actual density matrix $\rho$ reconstructed or simulated after propagation through noisy quantum hardware channels.
