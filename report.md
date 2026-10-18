@@ -194,35 +194,40 @@ The pure-Python routing table uses an identity initial layout and greedy shortes
 
 ### 6.4 Ideology & Architecture Design of Processor D (Proposed Solution)
 
-To address the Phase 1 judging requirement regarding architectural limitations and proposed hardware design, we conducted an in-depth analysis of execution characteristics observed on Processors A and B, motivating our team-designed **Processor D**.
+To address the Phase 1 judging requirement regarding architectural limitations and proposed hardware design, we conducted an in-depth analysis of execution characteristics and physical constraints observed on Processors A and B, motivating our team-designed **Processor D**.
 
-#### 1. Characteristics of Processors A and B
+#### 1. Characteristics & Bottlenecks of Processors A and B
 
 1. **Processor A (5-qubit 2016-inspired reference):**
    * **Central hub topology:** Configured as a 5-node graph with hub node 1 (degree 3) connecting to peripheral nodes 0, 4, and 2, with node 2 chaining to node 3.
-   * **Routing overhead:** While achieving a compact diameter of 3 and average shortest path of 1.800, non-local operations between node 3 and nodes 0/4 require multi-hop routing, resulting in 1 SWAP for star-entanglement workloads.
+   * **Routing overhead:** While achieving a compact diameter of 3 and average shortest path of 1.800, non-local operations between leaf node 3 and leaves 0/4 require multi-hop routing, resulting in 1 SWAP for star-entanglement and up to 9 SWAPs for all-to-all workloads.
 
 2. **Processor B (9-qubit chorded mesh-loop topology):**
-   * **Cycle-rich connectivity:** Processor B features 9 qubits and 12 edges, incorporating chorded 4-cycles and a central hub node 6 with degree 5. Its diameter is **4** and average shortest path length is **1.944**.
-   * **Hub routing:** The central connectivity at node 6 (connected to 1, 2, 5, 7, 8) provides high-degree branching that allows direct multi-qubit entanglement without intermediate SWAP gates.
+   * **Frequency crowding at degree-5 hub:** Node 6 connects to 5 neighbors (qubits 1, 2, 5, 7, 8). In superconducting transmon hardware, coupling 5 transmons to a single resonator introduces severe microwave frequency allocation crowding (risk of $\omega_{01} \approx \omega_{12}$ anharmonicity collisions) and parasitic $ZZ$-crosstalk.
+   * **Single-edge dead-end leaf:** Qubit 7 has degree 1, connected solely to qubit 6. Any interaction involving qubit 7 creates a single point of congestion at qubit 6.
+   * **Distributed routing overhead:** While node 6 allows direct star entanglement, general non-local workloads (such as all-to-all two-qubit interactions) experience bottlenecking between the left cycle (`0-8-6-1`) and right cycle (`2-3-4-5`), demanding **12 SWAPs** (46 CX-equivalents).
 
 #### 2. Ideology Behind Processor D
 
-The design philosophy of **Processor D** balances two core requirements:
-* **Physical Realizability:** It preserves a strictly 2D planar topology without non-planar crossovers or complex 3D interconnects, maintaining low cross-talk and compatibility with standard transmon lithography.
-* **Uniform Multi-Path Concurrency:** It eliminates asymmetric hub reliance by introducing uniform nearest-neighbor couplings across a symmetric $3 \times 3$ grid lattice (12 bidirectional edges, 9 physical qubits).
+The design philosophy of **Processor D** balances physical fabrication limits with algorithmic routing efficiency:
+* **Strict 2D Planarity Without Wire Crossovers:** Preserves a regular $3 \times 3$ grid mesh realisable with standard single-layer planar transmon lithography without requiring complex 3D airbridges or through-silicon vias (TSVs).
+* **Bounded Degree (Anti-Frequency-Crowding):** Maximum node degree is strictly bounded to 4 (at center node 4), with boundary nodes degree 3 and corners degree 2. This avoids the high-degree frequency collision risks inherent in Processor B's degree-5 hub.
+* **Elimination of Dead-End Leaves:** With minimum degree 2, every physical qubit participates in at least one closed cycle, ensuring redundant multi-path routing options.
+* **Superior Distributed Routing:** On all-to-all workloads (`results/tables/routing_estimate.csv`), Processor D requires only **8 SWAPs** (34 CXs), achieving a **$33.3\%$ SWAP reduction** compared to Processor B's 12 SWAPs (46 CXs).
 
 #### 3. Topological Comparison & Quantitative Impact
 
-| Metric | Processor A (2016 Ref) | Processor B (Mesh-Loop) | **Processor D (3×3 Grid)** | Architectural Comparison |
+| Metric | Processor A (2016 Ref) | Processor B (Mesh-Loop) | **Processor D (3×3 Grid)** | Architectural Benefit of D |
 |---|---:|---:|---:|---|
 | **Qubits ($N$)** | 5 | 9 | **9** | Matches scale of B |
-| **Coupling Edges ($E$)** | 4 | 12 | **12** | Equal edge count between B and D |
-| **Diameter** | 3 | 4 | **4** | Compact diameter across all models |
+| **Coupling Edges ($E$)** | 4 | 12 | **12** | Equal edge count with B |
+| **Diameter** | 3 | 4 | **4** | Compact diameter across all 9-qubit layouts |
 | **Avg Shortest Path** | 1.800 | 1.944 | **2.000** | Highly efficient nearest-neighbor routing |
-| **Avg SWAP Lower Bound** | 0.800 | 0.944 | **1.000** | Sub-1.0 average SWAP lower bound |
-| **Max Degree** | 3 | 5 | **4** | Hub routing at q6 (B) and center q4 (D) |
-| **Multi-Path Redundancy** | 1 (tree) | Multi-loop cycles | **$3\times3$ grid mesh** | Both B and D offer alternative routing |
+| **Max Degree** | 3 | 5 | **4** | Avoids degree-5 transmon frequency crowding |
+| **Min Degree (Leaves)** | 1 (leaves: 0, 3, 4) | 1 (leaf: 7) | **2 (zero dead ends)** | Eliminates single-point routing traps |
+| **All-to-All 5Q SWAPs** | 9 | 12 | **8** | **$33.3\%$ SWAP reduction** vs B ($8$ vs $12$) |
+| **GHZ-5 Transpiled SWAPs** | 1 | 0 | **0** | Zero routing overhead on star entanglement |
+| **Multi-Path Redundancy** | None (tree) | Asymmetric loops | **Symmetric $3\times3$ grid** | Uniform alternative paths across all interior nodes |
 
 ### 6.5 Measured Qiskit Aer Simulation Results on Processors A, B, and D
 
