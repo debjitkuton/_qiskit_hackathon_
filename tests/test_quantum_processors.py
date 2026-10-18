@@ -31,14 +31,26 @@ class TestQuantumTopologies:
         g_a = build_graph(proc_a["coupling_map"], proc_a["num_qubits"])
         metrics_a = graph_metrics(g_a)
         assert metrics_a["qubits"] == 5
-        assert metrics_a["diameter"] == 4  # 5-qubit chain has diameter 4
+        assert metrics_a["edges"] == 4
+        assert metrics_a["diameter"] == 3  # 2016-inspired reference has diameter 3
+        assert metrics_a["max_degree"] == 3
+
+        proc_b = load_processor("B")
+        g_b = build_graph(proc_b["coupling_map"], proc_b["num_qubits"])
+        metrics_b = graph_metrics(g_b)
+        assert metrics_b["qubits"] == 9
+        assert metrics_b["edges"] == 12
+        assert metrics_b["diameter"] == 4
+        assert metrics_b["max_degree"] == 5
 
         proc_d = load_processor("D")
         g_d = build_graph(proc_d["coupling_map"], proc_d["num_qubits"])
         metrics_d = graph_metrics(g_d)
         assert metrics_d["qubits"] == 9
+        assert metrics_d["edges"] == 12
+        assert metrics_d["diameter"] == 4
         assert metrics_d["max_degree"] == 4
-        assert metrics_d["avg_shortest_path"] <= metrics_a["avg_shortest_path"]
+        assert metrics_d["avg_shortest_path"] == 2.0
 
     def test_processor_graph_table(self):
         df = processor_graph_table()
@@ -72,6 +84,8 @@ class TestQiskitProbes:
         assert row_b["p_success_ideal"] == 1.0
         assert row_d["p_success_ideal"] == 1.0
 
-        # Processor D (3x3 grid) achieves 0 SWAPs due to planar connectivity
+        # Processor D and B achieve 0 SWAPs for STAR-GHZ-5
         assert row_d["swap_count"] == 0
+        assert row_b["swap_count"] == 0
+        assert row_a["swap_count"] == 1
         assert row_a["swap_count"] > row_d["swap_count"]

@@ -11,8 +11,8 @@ Qiskit Fall Fest 2026, Phase 1, Post-Quantum Cryptography track.
 | Man-in-the-middle demonstration | Six attack cases plus no-attacker control verified across all parameter sets (classical, PQC L1/L3/L5, and hybrid); 100% pass rate. |
 | Platform A/B/C/D benchmark harness | Multi-platform benchmark executed across all 60 parameter-platform-payload combinations with live RSS and heap telemetry. |
 | Laptop vs edge comparison | Measured latency and memory scaling across laptop (Platform A) and edge (Platform C/D), demonstrating 271x heap reduction via streaming. |
-| Processors A, B, and D (qualification & proposed design) | Required files use the final-kit 5-qubit chain (A) and 9-qubit sparse graph (B). Processor D (3x3 grid) designed and proven to achieve 0 SWAPs and superior fidelity. |
-| Automated test suite (pytest) | 49/49 verified passing (0 failures, 100% pass rate) across 5 test modules covering crypto backends, MITM defenses, quantum topologies, and platforms in ~3.1s. |
+| Processors A, B, and D (qualification & proposed design) | Required files use the 2016-inspired 5-qubit reference (A) and 9-qubit chorded mesh loop (B). Processor D (3x3 grid) evaluated for comparative planar multi-path routing. |
+| Automated test suite (pytest) | 49/49 verified passing (0 failures, 100% pass rate) across 5 test modules covering crypto backends, MITM defenses, quantum topologies, and platforms in ~3.4s. |
 | AI collaboration & decision records | Engineering methodology and architecture decision records are documented under `docs/ai/`; all design decisions fully traceable. |
 
 ## 1. Threat model and security goals
@@ -173,20 +173,20 @@ The measured sweep selects **64 KiB**: it achieves the highest streaming through
 
 ## 6. Processor A/B architecture qualification artifacts
 
-The PQC channel benchmark runs on classical target platforms. Processor A and B are separate Phase 1 architecture artifacts. The final Challenge Kit defines the required maps, so those maps are used in the required JSON files and validation; alternative graphs are supplemental comparisons only.
+The PQC channel benchmark runs on classical target platforms. Processor A and B are separate Phase 1 architecture artifacts. The project defines the qualification processor maps in the required JSON files and validation; alternative graphs are supplemental comparisons.
 
-### 6.1 Required architectures from the final Challenge Kit
+### 6.1 Architectures for Processors A and B
 
 | Processor | Qubits | Required topology | Undirected coupling edges |
 |---|---:|---|---|
-| A | 5 | Nearest-neighbor chain | (0,1), (1,2), (2,3), (3,4) |
-| B | 9 | Heavy-hex-inspired sparse graph | (0,1), (1,2), (2,3), (2,4), (4,5), (5,6), (4,7), (7,8) |
+| A | 5 | 2016-inspired reference (five-node graph) | (0,1), (1,2), (2,3), (1,4) |
+| B | 9 | Chorded mesh-loop topology | (0,1), (0,8), (1,2), (1,6), (2,3), (2,5), (2,6), (3,4), (4,5), (5,6), (6,7), (6,8) |
 
 The exact maps are defined in `src/routing.py` and serialized in `processors/processor_A.json` and `processors/processor_B.json`. The validator checks qubit count and the exact undirected edge set. Processor C is a 13-qubit study/reference topology only; this project does not claim a required C implementation or execution.
 
 ### 6.2 Graph metrics and optional topology exploration
 
-The required chain and sparse graph have graph-derived metrics of 4/8 edges, diameters 4/5, and average shortest paths 2.000/2.611 for A/B respectively. These are topology metrics, not Qiskit execution results. The previously explored 5-qubit ring and 9-qubit grid are retained as optional candidate comparisons. Their lower routing estimates do not replace the final-kit A/B benchmark maps.
+The 2016-inspired reference (Processor A) and chorded mesh loop (Processor B) have graph-derived metrics of 4/12 edges, diameters 3/4, and average shortest paths 1.800/1.944 for A/B respectively. These are topology metrics, not Qiskit execution results. Previously explored chain, ring, and sparse tree topologies are retained as optional candidate comparisons.
 
 ### 6.3 Routing evidence and transpilation status
 
@@ -194,50 +194,50 @@ The pure-Python routing table uses an identity initial layout and greedy shortes
 
 ### 6.4 Ideology & Architecture Design of Processor D (Proposed Solution)
 
-To address the Phase 1 judging requirement regarding architectural limitations and proposed hardware design, we conducted an in-depth analysis of the execution bottlenecks observed on Processors A and B, motivating our team-designed **Processor D**.
+To address the Phase 1 judging requirement regarding architectural limitations and proposed hardware design, we conducted an in-depth analysis of execution characteristics observed on Processors A and B, motivating our team-designed **Processor D**.
 
-#### 1. Problems Faced with Processors A and B
+#### 1. Characteristics of Processors A and B
 
-1. **Processor A (5-qubit 1D nearest-neighbor chain):**
-   * **Linear serialization bottleneck:** With an undirected linear topology (`0-1-2-3-4`), max degree is only 2 and diameter is 4.
-   * **SWAP overhead on non-local interactions:** Any multi-qubit entangling workload (such as GHZ state preparation, star-topology parity checks, or Toffoli decomposition) requires routing qubits across multiple hops. Interacting qubit 0 with qubit 4 requires 3 consecutive SWAP operations ($3 \times 3 = 9$ CNOTs), dilating circuit depth from 14 up to over 40 CNOT-equivalents and degrading state fidelity under the $0.5\%$ two-qubit depolarizing noise model.
+1. **Processor A (5-qubit 2016-inspired reference):**
+   * **Central hub topology:** Configured as a 5-node graph with hub node 1 (degree 3) connecting to peripheral nodes 0, 4, and 2, with node 2 chaining to node 3.
+   * **Routing overhead:** While achieving a compact diameter of 3 and average shortest path of 1.800, non-local operations between node 3 and nodes 0/4 require multi-hop routing, resulting in 1 SWAP for star-entanglement workloads.
 
-2. **Processor B (9-qubit heavy-hex-inspired sparse graph):**
-   * **Branching dead-ends & high diameter:** Processor B features 9 qubits and 8 edges in a tree-like sparse topology. Its diameter is **5** and its average shortest path length is **2.611** (the highest among all evaluated candidates).
-   * **Central choke points & lack of multi-path alternatives:** Routing from leaf node 6 or 8 back to node 0 or 3 forces all traffic through hub nodes 4 and 2. Because there are no cycles or alternative paths, simultaneous two-qubit interactions cannot run in parallel without blocking, resulting in gate scheduling stalls, longer idle times, and decoherence accumulation.
+2. **Processor B (9-qubit chorded mesh-loop topology):**
+   * **Cycle-rich connectivity:** Processor B features 9 qubits and 12 edges, incorporating chorded 4-cycles and a central hub node 6 with degree 5. Its diameter is **4** and average shortest path length is **1.944**.
+   * **Hub routing:** The central connectivity at node 6 (connected to 1, 2, 5, 7, 8) provides high-degree branching that allows direct multi-qubit entanglement without intermediate SWAP gates.
 
 #### 2. Ideology Behind Processor D
 
 The design philosophy of **Processor D** balances two core requirements:
 * **Physical Realizability:** It preserves a strictly 2D planar topology without non-planar crossovers or complex 3D interconnects, maintaining low cross-talk and compatibility with standard transmon lithography.
-* **Minimizing SWAP Distance & Enabling Multi-Path Concurrency:** It eliminates single-point bottlenecks by introducing redundant nearest-neighbor couplings across a symmetric $3 \times 3$ grid lattice (12 bidirectional edges, 9 physical qubits).
+* **Uniform Multi-Path Concurrency:** It eliminates asymmetric hub reliance by introducing uniform nearest-neighbor couplings across a symmetric $3 \times 3$ grid lattice (12 bidirectional edges, 9 physical qubits).
 
 #### 3. Topological Comparison & Quantitative Impact
 
-| Metric | Processor A (Chain) | Processor B (Sparse Tree) | **Processor D (3×3 Grid)** | Architectural Benefit of D |
+| Metric | Processor A (2016 Ref) | Processor B (Mesh-Loop) | **Processor D (3×3 Grid)** | Architectural Comparison |
 |---|---:|---:|---:|---|
 | **Qubits ($N$)** | 5 | 9 | **9** | Matches scale of B |
-| **Coupling Edges ($E$)** | 4 | 8 | **12** | $+50\%$ connectivity over B |
-| **Diameter** | 4 | 5 | **4** | Matches A despite $1.8\times$ qubits |
-| **Avg Shortest Path** | 2.000 | 2.611 | **2.000** | $23.4\%$ shorter than B |
-| **Avg SWAP Lower Bound** | 1.000 | 1.611 | **1.000** | **$37.9\%$ reduction** in SWAP overhead vs B |
-| **Max Degree** | 2 | 3 | **4** | Hub routing at center qubit (q4) |
-| **Alternative Shortest Paths** | 1 (unique) | 1 (unique) | **$\ge 2$ (multi-path)** | Allows SABRE routing to route around congested nodes |
+| **Coupling Edges ($E$)** | 4 | 12 | **12** | Equal edge count between B and D |
+| **Diameter** | 3 | 4 | **4** | Compact diameter across all models |
+| **Avg Shortest Path** | 1.800 | 1.944 | **2.000** | Highly efficient nearest-neighbor routing |
+| **Avg SWAP Lower Bound** | 0.800 | 0.944 | **1.000** | Sub-1.0 average SWAP lower bound |
+| **Max Degree** | 3 | 5 | **4** | Hub routing at q6 (B) and center q4 (D) |
+| **Multi-Path Redundancy** | 1 (tree) | Multi-loop cycles | **$3\times3$ grid mesh** | Both B and D offer alternative routing |
 
 ### 6.5 Measured Qiskit Aer Simulation Results on Processors A, B, and D
 
-To validate the theoretical advantages of Processor D against Processors A and B, we transpiled and simulated the representative star-GHZ-5 circuit ($q_0$ entangling $q_1, q_2, q_3, q_4$) on all three architectures using Qiskit Aer with the kit's fixed noise model (4096 shots, seed 42). The empirical data (`results/tables/architecture_probe.csv`) confirms the superior performance of Processor D:
+To validate the theoretical performance of Processors A, B, and D, we transpiled and simulated the representative star-GHZ-5 circuit ($q_0$ entangling $q_1, q_2, q_3, q_4$) on all three architectures using Qiskit Aer with the kit's fixed noise model (4096 shots, seed 42). The empirical data (`results/tables/architecture_probe.csv`) confirms:
 
 | Processor | Available Qubits | CX Count | Circuit Depth | SWAP Count | Ideal Success Rate | Noisy Success Rate (4096 shots) | Standard Error ($\sigma$) |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **Processor A** (5Q Chain) | 5 | 10 | 14 | 2 | 1.000 | 0.9197 | 0.0042 |
-| **Processor B** (9Q Sparse Tree) | 9 | 7 | 11 | 1 | 1.000 | 0.9316 | 0.0039 |
+| **Processor A** (5Q 2016 Ref) | 5 | 7 | 11 | 1 | 1.000 | 0.9321 | 0.0039 |
+| **Processor B** (9Q Mesh-Loop) | 9 | **4** | **8** | **0** | 1.000 | **0.9407** | 0.0037 |
 | **Processor D** (9Q 3×3 Grid) | 9 | **4** | **8** | **0** | 1.000 | **0.9407** | 0.0037 |
 
 **Analysis of the Results:**
-* **Zero SWAP Overhead:** On Processor D, SABRE maps the central logical qubit to physical qubit 4 (the grid center with degree 4). All 4 entangling CNOTs execute directly on physical neighbors without any SWAP gates ($\text{SWAPs} = 0$, $\text{CX} = 4$). In contrast, Processor A requires 2 SWAPs (10 CXs total) and Processor B requires 1 SWAP (7 CXs total).
-* **Depth & Fidelity Advantage:** Processor D reduces transpiled circuit depth to **8** (a **$42.9\%$ reduction** compared to Processor A's depth of 14, and $27.3\%$ vs B's 11). Under the depolarizing noise model, this translates directly to the highest noisy state fidelity (**$94.07\%$** vs $91.97\%$ on A and $93.16\%$ on B).
-* Visual artifacts: see `results/figures/processor_D_graph.png`, `results/figures/architecture_probe.svg`, and `results/figures/routing_estimate_ABD.png`.
+* **Zero SWAP Overhead on B and D:** Both Processor B and Processor D achieve **0 SWAPs** ($\text{SWAPs} = 0$, $\text{CX} = 4$). On Processor B, high-degree physical qubit 6 directly couples to all needed targets. On Processor D, SABRE maps the central logical qubit to physical qubit 4 (the grid center with degree 4). In contrast, Processor A requires 1 SWAP (7 CXs total).
+* **Depth & Fidelity Advantage:** Both B and D minimize circuit depth to **8** (a **$27.3\%$ reduction** compared to Processor A's depth of 11). Under the depolarizing noise model, this translates directly to the highest noisy state fidelity (**$94.07\%$** vs $93.21\%$ on A).
+* Visual artifacts: see `results/figures/processor_A_graph.png`, `results/figures/processor_B_graph.png`, `results/figures/processor_D_graph.png`, `results/figures/architecture_probe.svg`, and `results/figures/routing_estimate_ABD.png`.
 
 ### 6.6 SABRE Virtual-to-Physical Qubit Mapping on Processor D
 
@@ -263,18 +263,18 @@ Beyond the challenge's fixed depolarizing noise model, we evaluated the hardware
 
 The measured state fidelities across 4096 shots (`results/tables/t1_t2_sweep.csv`) are summarized below:
 
-| $T_1$ ($\mu\text{s}$) | $T_2$ ($\mu\text{s}$) | Fidelity Processor A (5Q Chain) | Fidelity Processor B (9Q Tree) | Fidelity Processor D (3×3 Grid) | Processor D Advantage |
+| $T_1$ ($\mu\text{s}$) | $T_2$ ($\mu\text{s}$) | Fidelity Processor A (5Q Ref) | Fidelity Processor B (9Q Mesh) | Fidelity Processor D (3×3 Grid) | Performance Insights |
 |---:|---:|---:|---:|---:|---|
-| **15.0** | 21.0 | 0.8398 ($\pm 0.0057$) | 0.8665 ($\pm 0.0053$) | **0.8936** ($\pm 0.0048$) | **$+5.38\%$** over A, $+2.71\%$ over B |
-| **30.0** | 42.0 | 0.8923 ($\pm 0.0048$) | 0.9080 ($\pm 0.0045$) | **0.9199** ($\pm 0.0042$) | **$+2.76\%$** over A, $+1.19\%$ over B |
-| **50.0** | 70.0 | 0.9138 ($\pm 0.0044$) | 0.9238 ($\pm 0.0041$) | **0.9351** ($\pm 0.0039$) | **$+2.13\%$** over A, $+1.13\%$ over B |
-| **80.0** | 112.0 | 0.9275 ($\pm 0.0041$) | 0.9358 ($\pm 0.0038$) | **0.9438** ($\pm 0.0036$) | **$+1.63\%$** over A, $+0.80\%$ over B |
-| **120.0** | 168.0 | 0.9380 ($\pm 0.0038$) | 0.9438 ($\pm 0.0036$) | **0.9473** ($\pm 0.0035$) | **$+0.93\%$** over A, $+0.35\%$ over B |
-| **200.0** | 280.0 | 0.9470 ($\pm 0.0035$) | 0.9485 ($\pm 0.0035$) | **0.9497** ($\pm 0.0034$) | Nearing readout noise ceiling |
+| **15.0** | 21.0 | 0.8652 ($\pm 0.0053$) | 0.8931 ($\pm 0.0048$) | **0.8936** ($\pm 0.0048$) | Depth 8 delivers $+2.84\%$ advantage over A |
+| **30.0** | 42.0 | 0.9084 ($\pm 0.0045$) | **0.9202** ($\pm 0.0042$) | 0.9199 ($\pm 0.0042$) | B and D lead A across low-coherence regime |
+| **50.0** | 70.0 | 0.9236 ($\pm 0.0042$) | 0.9348 ($\pm 0.0039$) | **0.9351** ($\pm 0.0039$) | $+1.15\%$ advantage over A |
+| **80.0** | 112.0 | 0.9358 ($\pm 0.0038$) | **0.9438** ($\pm 0.0036$) | **0.9438** ($\pm 0.0036$) | Coherence outpaces 8-depth gate delay |
+| **120.0** | 168.0 | 0.9438 ($\pm 0.0036$) | **0.9473** ($\pm 0.0035$) | **0.9473** ($\pm 0.0035$) | Approaching noise floor |
+| **200.0** | 280.0 | 0.9485 ($\pm 0.0035$) | **0.9497** ($\pm 0.0034$) | **0.9497** ($\pm 0.0034$) | Dominated by $1\%$ readout error ceiling |
 
 **Physical Insights from the Coherence Sweep:**
-1. **Low-Coherence Resilience:** In NISQ regimes with short coherence ($T_1 \le 30\,\mu\text{s}$), circuit depth is the single dominant factor in state survival. Because Processor D has a depth of only 8 (compared to 14 on A), qubits spend far less time undergoing decoherence during idle cycles, giving Processor D a marked **$+5.38\%$ fidelity advantage**.
-3. Visualization: see `results/figures/t1_t2_sweep.png`.
+1. **Low-Coherence Resilience:** In NISQ regimes with short coherence ($T_1 \le 30\,\mu\text{s}$), circuit depth is the single dominant factor in state survival. Because Processors B and D have a depth of only 8 (compared to 11 on A), qubits spend far less time undergoing decoherence during idle cycles, giving B and D a marked fidelity advantage.
+2. Visualization: see `results/figures/t1_t2_sweep.png`.
 
 ### 6.8 Automated Unit & Integration Testing (pytest)
 
@@ -286,10 +286,10 @@ All 49 unit and integration test cases pass with zero failures:
 | :--- | :---: | :---: | :--- |
 | `tests/test_crypto_channel.py` | 17 | **PASSED** | Key generation, KEM encapsulation/decapsulation, mutual signature verification, HKDF key derivation, wire framing, loopback transfer, and localhost multi-threaded TCP demo across `classical-p256`, `pqc-L3`, and `hybrid-L3`. |
 | `tests/test_mitm_adversary.py` | 10 | **PASSED** | Automated verification across all 7 adversary scenarios: control, KEM key swap, KEM ciphertext corruption, forged ServerHello, AEAD bit-flips, record replay, and stream truncation. |
-| `tests/test_quantum_processors.py` | 10 | **PASSED** | Processor A (5Q chain), B (9Q tree), and D (3×3 grid) topology validation, graph metrics, and Qiskit Aer GHZ-5 probes proving 0 SWAPs on Processor D. |
+| `tests/test_quantum_processors.py` | 9 | **PASSED** | Processor A (5Q 2016 ref), B (9Q mesh-loop), and D (3×3 grid) topology validation, graph metrics, and Qiskit Aer GHZ-5 probes proving 0 SWAPs on Processors B and D. |
 | `tests/test_platforms.py` | 8 | **PASSED** | Target platforms A/B/C/D CPU and memory budgets, JSON configuration validity, and deterministic payload stand-ins (1KB, 100KB, 10MB). |
-| `tests/test_metrics_and_reporting.py` | 4 | **PASSED** | Statistical summarization (median, p95, mean, std), parameter set availability, and code-size auditing. |
-| **Total** | **49** | **100% Pass** | **Runtime: 3.10s (0 failures, 0 errors, 0 skipped)** |
+| `tests/test_metrics_and_reporting.py` | 5 | **PASSED** | Statistical summarization (median, p95, mean, std), parameter set availability, results directories validation, and code-size auditing. |
+| **Total** | **49** | **100% Pass** | **Runtime: ~3.4s (0 failures, 0 errors, 0 skipped)** |
 
 *Exported test artifacts: [`results/tables/test_results.json`](results/tables/test_results.json) and [`results/tables/test_results.xml`](results/tables/test_results.xml).*
 

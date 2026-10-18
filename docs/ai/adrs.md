@@ -106,3 +106,25 @@ Remove the simulator. `OQSBackend` must use the vetted `liboqs-python` binding a
 ### Consequences
 - PQC correctness and timing claims require an actual vetted-library run.
 - Old fallback-produced PQC timings and attack rows are historical, unverified artifacts and are excluded from conclusions until rerun.
+
+---
+
+## ADR-007: Processor A & B Topology Update (2016-Inspired Reference & Chorded Mesh)
+
+### Status
+Accepted — updated processor configurations.
+
+### Context
+User requested replacing the processor configurations with the updated architectures:
+1. Processor A: 2016-inspired 5-qubit reference architecture with a synthetic noise model (hub node 1, degree 3, diameter 3).
+2. Processor B: 9-qubit chorded mesh-loop topology (12 edges, diameter 4, central hub node 6 with degree 5).
+
+### Decision
+1. Update `processors/processor_A.json` to coupling map `[(0, 1), (1, 2), (2, 3), (1, 4)]`.
+2. Update `processors/processor_B.json` to coupling map `[(0, 1), (0, 8), (1, 2), (1, 6), (2, 3), (2, 5), (2, 6), (3, 4), (4, 5), (5, 6), (6, 7), (6, 8)]`.
+3. Synchronize `src/routing.py`, `src/architecture_probe.py`, `src/visualization.py`, test suites, and all benchmark tables.
+
+### Consequences
+- Processor A achieves a reduced diameter of 3 and average shortest path of 1.800 (reducing GHZ-5 SWAPs to 1 and depth to 11).
+- Processor B achieves 0 SWAPs and depth 8 for STAR-GHZ-5 preparation via direct cardinal coupling from hub qubit 6.
+- All 49 automated pytest tests pass with 100% verification.

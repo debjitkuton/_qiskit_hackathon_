@@ -24,11 +24,17 @@ from .problem import PROCESSORS_DIR
 # Kit specification, transcribed independently of the JSON files so they can be cross-checked.
 CANDIDATE_TOPOLOGIES = {
     "A": {
+        "reference_2016": {
+            "name": "Processor A (5-qubit 2016-inspired reference)",
+            "coupling_map": [(0, 1), (1, 2), (2, 3), (1, 4)],
+            "topology": "2016-inspired five-node reference graph",
+            "description": "2016-inspired five-qubit reference topology with synthetic noise model; diameter 3, average path length 1.8.",
+        },
         "chain_baseline": {
-            "name": "Processor A (5-qubit chain - required)",
+            "name": "Processor A chain (optional candidate)",
             "coupling_map": [(0, 1), (1, 2), (2, 3), (3, 4)],
             "topology": "nearest-neighbor chain",
-            "description": "Required Phase 1 Processor A: 5-qubit nearest-neighbor chain, edges 0-1-2-3-4.",
+            "description": "5-qubit nearest-neighbor linear chain, edges 0-1-2-3-4.",
         },
         "ring": {
             "name": "Processor A ring (optional candidate)",
@@ -42,19 +48,22 @@ CANDIDATE_TOPOLOGIES = {
             "topology": "star graph",
             "description": "5-qubit star centered at q0. Fast 1-hop routing to hub, but hub degree 4 introduces frequency crowding and physical crosstalk.",
         },
-        "t_shape": {
-            "name": "Processor A (T-shape)",
-            "coupling_map": [(0, 1), (1, 2), (2, 3), (1, 4)],
-            "topology": "T-branched graph",
-            "description": "5-qubit T-branched topology; diameter 3, average path length 1.8.",
-        },
     },
     "B": {
-        "tree_baseline": {
-            "name": "Processor B (9-qubit sparse graph - required)",
+        "mesh_baseline": {
+            "name": "Processor B (9-qubit mesh-loop topology)",
+            "coupling_map": [
+                (0, 1), (0, 8), (1, 2), (1, 6), (2, 3), (2, 5), (2, 6),
+                (3, 4), (4, 5), (5, 6), (6, 7), (6, 8),
+            ],
+            "topology": "9-qubit chorded mesh graph",
+            "description": "Processor B: 9-qubit topology with 12 edges, diameter 4, average shortest path 1.944.",
+        },
+        "tree_sparse": {
+            "name": "Processor B sparse tree (optional candidate)",
             "coupling_map": [(0, 1), (1, 2), (2, 3), (2, 4), (4, 5), (5, 6), (4, 7), (7, 8)],
             "topology": "heavy-hex-inspired sparse graph",
-            "description": "Required Phase 1 Processor B: 9-qubit heavy-hex-inspired sparse graph with the exact coupling map in the final Challenge Kit.",
+            "description": "9-qubit heavy-hex-inspired sparse graph with branch points at 2 and 4.",
         },
         "grid_3x3": {
             "name": "Processor B 3x3 grid (optional candidate)",
@@ -75,8 +84,8 @@ CANDIDATE_TOPOLOGIES = {
 }
 
 KIT_COUPLING = {
-    "A": CANDIDATE_TOPOLOGIES["A"]["chain_baseline"]["coupling_map"],
-    "B": CANDIDATE_TOPOLOGIES["B"]["tree_baseline"]["coupling_map"],
+    "A": CANDIDATE_TOPOLOGIES["A"]["reference_2016"]["coupling_map"],
+    "B": CANDIDATE_TOPOLOGIES["B"]["mesh_baseline"]["coupling_map"],
     "D": CANDIDATE_TOPOLOGIES["B"]["grid_3x3"]["coupling_map"],
 }
 KIT_QUBITS = {"A": 5, "B": 9, "D": 9}
@@ -152,11 +161,11 @@ def processor_graph_table() -> pd.DataFrame:
         rows.append({"processor": proc["name"], "required": True, **graph_metrics(build_graph(proc["coupling_map"], proc["num_qubits"]))})
     # Optional topology analysis is separate from the required benchmark maps.
     for t_key, t_info in CANDIDATE_TOPOLOGIES["A"].items():
-        if t_key == "chain_baseline":
+        if t_key == "reference_2016":
             continue
         rows.append({"processor": f"Candidate A: {t_info['name']}", "required": False, **graph_metrics(build_graph(t_info["coupling_map"], 5))})
     for t_key, t_info in CANDIDATE_TOPOLOGIES["B"].items():
-        if t_key == "tree_baseline":
+        if t_key == "mesh_baseline":
             continue
         rows.append({"processor": f"Candidate B: {t_info['name']}", "required": False, **graph_metrics(build_graph(t_info["coupling_map"], 9))})
     rows.append({"processor": "Processor C (study only)", "required": False, **graph_metrics(build_graph(PROCESSOR_C_STUDY, 13))})
@@ -186,11 +195,11 @@ BENCHMARK = {"shots": 4096, "transpile_optimization_level": 1, "layout_routing":
 def build_processor_dict(key: str, variant: str = None) -> dict:
     """Processor definition built from participant's architectural exploration."""
     if key == "A":
-        chosen = CANDIDATE_TOPOLOGIES["A"][variant or "chain_baseline"]
-        source = "Final QFF Phase 1 Challenge Kit required Processor A architecture"
+        chosen = CANDIDATE_TOPOLOGIES["A"][variant or "reference_2016"]
+        source = "2016-inspired 5-qubit reference architecture with synthetic noise model"
     else:
-        chosen = CANDIDATE_TOPOLOGIES["B"][variant or "tree_baseline"]
-        source = "Final QFF Phase 1 Challenge Kit required Processor B architecture"
+        chosen = CANDIDATE_TOPOLOGIES["B"][variant or "mesh_baseline"]
+        source = "Processor B 9-qubit architecture specification"
     return {
         "name": chosen["name"],
         "source": source,
@@ -261,9 +270,11 @@ def routing_estimate_table() -> pd.DataFrame:
     # Comparative candidate analysis as requested by organizers
     proc_d = load_processor("D")
     topos_to_compare = [
-        ("A - Chain (Baseline)", CANDIDATE_TOPOLOGIES["A"]["chain_baseline"]["coupling_map"], 5),
+        ("A - 2016 Reference (Required)", CANDIDATE_TOPOLOGIES["A"]["reference_2016"]["coupling_map"], 5),
+        ("A - Chain (optional candidate)", CANDIDATE_TOPOLOGIES["A"]["chain_baseline"]["coupling_map"], 5),
         ("A - Ring (optional candidate)", CANDIDATE_TOPOLOGIES["A"]["ring"]["coupling_map"], 5),
-        ("B - Sparse Graph (required)", CANDIDATE_TOPOLOGIES["B"]["tree_baseline"]["coupling_map"], 9),
+        ("B - Mesh-Loop (Required)", CANDIDATE_TOPOLOGIES["B"]["mesh_baseline"]["coupling_map"], 9),
+        ("B - Sparse Tree (optional candidate)", CANDIDATE_TOPOLOGIES["B"]["tree_sparse"]["coupling_map"], 9),
         ("B - 3x3 Grid (optional candidate)", CANDIDATE_TOPOLOGIES["B"]["grid_3x3"]["coupling_map"], 9),
         ("D - 3x3 Grid (team design)", proc_d["coupling_map"], proc_d["num_qubits"]),
     ]

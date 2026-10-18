@@ -1,16 +1,24 @@
 {
-  "name": "Processor B (9-qubit sparse graph - required)",
-  "source": "Final QFF Phase 1 Challenge Kit required Processor B architecture",
+  "name": "Processor B (9-qubit mesh-loop topology)",
+  "source": "Processor B 9-qubit architecture specification",
   "num_qubits": 9,
-  "topology": "heavy-hex-inspired sparse graph",
+  "topology": "9-qubit chorded mesh graph",
   "coupling_map": [
     [
       0,
       1
     ],
     [
+      0,
+      8
+    ],
+    [
       1,
       2
+    ],
+    [
+      1,
+      6
     ],
     [
       2,
@@ -18,6 +26,14 @@
     ],
     [
       2,
+      5
+    ],
+    [
+      2,
+      6
+    ],
+    [
+      3,
       4
     ],
     [
@@ -29,11 +45,11 @@
       6
     ],
     [
-      4,
+      6,
       7
     ],
     [
-      7,
+      6,
       8
     ]
   ],
@@ -57,5 +73,5 @@
     "layout_routing": "SABRE",
     "seed": 42
   },
-  "note": "Required Phase 1 Processor B: 9-qubit heavy-hex-inspired sparse graph with the exact coupling map in the final Challenge Kit."
+  "note": "Processor B: 9-qubit topology with 12 edges, diameter 4, average shortest path 1.944."
 }

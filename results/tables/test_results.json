@@ -1,6 +1,6 @@
 {
   "suite": "PS-P1 Quantum-Safe Secure Channel Test Suite",
-  "timestamp_utc": "2026-10-17T10:48:13Z",
+  "timestamp_utc": "2026-10-18T12:47:20Z",
   "environment": {
     "os": "Windows",
     "platform": "Windows-10-10.0.26200-SP0",
@@ -11,7 +11,7 @@
     "passed": 49,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 3.1,
+    "duration_seconds": 3.4,
     "pass_rate_pct": 100.0
   },
   "modules": [
@@ -29,9 +29,9 @@
     },
     {
       "file": "tests/test_quantum_processors.py",
-      "tests_count": 10,
-      "passed": 10,
-      "scope": "Processor A (5-qubit chain), B (9-qubit sparse), and D (3x3 grid) topology validation, graph metrics, and Qiskit Aer GHZ-5 probes proving 0 SWAPs on Processor D"
+      "tests_count": 9,
+      "passed": 9,
+      "scope": "Processor A (5-qubit 2016 reference), B (9-qubit mesh-loop), and D (3x3 grid) topology validation, graph metrics, and Qiskit Aer GHZ-5 probes proving 0 SWAPs on Processors B and D"
     },
     {
       "file": "tests/test_platforms.py",
@@ -41,9 +41,9 @@
     },
     {
       "file": "tests/test_metrics_and_reporting.py",
-      "tests_count": 4,
-      "passed": 4,
-      "scope": "Statistical summarization (median, p95, mean, std), available parameter set checks, and code-size table generation"
+      "tests_count": 5,
+      "passed": 5,
+      "scope": "Statistical summarization (median, p95, mean, std), available parameter set checks, code-size table generation, and results directories verification"
     }
   ]
 }

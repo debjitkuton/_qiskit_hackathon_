@@ -41,7 +41,15 @@ def _node_pos(g: nx.Graph, key: str, topology: str) -> dict:
     n = g.number_of_nodes()
     top_lower = str(topology).lower()
     if key == "A":
-        if "ring" in top_lower or "cycle" in top_lower:
+        if "reference" in top_lower or "2016" in top_lower or "t-branch" in top_lower or "t-shape" in top_lower:
+            return {
+                1: (0.0, 1.0),
+                0: (-0.8, 0.3),
+                4: (0.8, 0.3),
+                2: (0.0, -0.1),
+                3: (0.0, -1.0),
+            }
+        elif "ring" in top_lower or "cycle" in top_lower:
             return {i: (float(np.cos(2 * np.pi * i / n + np.pi / 2)), float(np.sin(2 * np.pi * i / n + np.pi / 2))) for i in range(n)}
         elif "chain" in top_lower:
             return {i: (float(i), 0.0) for i in range(n)}
@@ -51,7 +59,19 @@ def _node_pos(g: nx.Graph, key: str, topology: str) -> dict:
             return pos
         return nx.spring_layout(g, seed=42)
     elif key == "B":
-        if "grid" in top_lower or "mesh" in top_lower:
+        if "mesh" in top_lower or "chord" in top_lower:
+            return {
+                0: (0.0, 0.0),
+                8: (0.7, 1.1),
+                1: (1.4, -0.2),
+                6: (2.0, 0.9),
+                7: (2.0, 2.3),
+                2: (2.7, -0.3),
+                5: (3.5, 0.5),
+                3: (4.0, -1.1),
+                4: (4.7, -0.2),
+            }
+        if "grid" in top_lower:
             return {i: (float(i % 3), float(-(i // 3))) for i in range(n)}
         return nx.spring_layout(g, seed=42)
     elif key == "D":

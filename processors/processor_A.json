@@ -1,8 +1,8 @@
 {
-  "name": "Processor A (5-qubit chain - required)",
-  "source": "Final QFF Phase 1 Challenge Kit required Processor A architecture",
+  "name": "Processor A (5-qubit 2016-inspired reference)",
+  "source": "2016-inspired 5-qubit reference architecture with synthetic noise model",
   "num_qubits": 5,
-  "topology": "nearest-neighbor chain",
+  "topology": "2016-inspired five-node reference graph",
   "coupling_map": [
     [
       0,
@@ -17,7 +17,7 @@
       3
     ],
     [
-      3,
+      1,
       4
     ]
   ],
@@ -41,5 +41,5 @@
     "layout_routing": "SABRE",
     "seed": 42
   },
-  "note": "Required Phase 1 Processor A: 5-qubit nearest-neighbor chain, edges 0-1-2-3-4."
+  "note": "2016-inspired five-qubit reference topology with synthetic noise model; diameter 3, average path length 1.8."
 }
