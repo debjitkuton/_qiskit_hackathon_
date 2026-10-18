@@ -94,8 +94,41 @@ KIT_QUBITS = {"A": 5, "B": 9, "D": 9}
 PROCESSOR_C_STUDY = [(i, (i + 1) % 12) for i in range(12)] + [(12, k) for k in (0, 2, 4, 6, 8, 10)]
 
 
+PROCESSOR_D_SPEC = {
+    "name": "Processor D (Candidate 9Q 3x3 Grid)",
+    "source": "Physical 2D nearest-neighbor superconducting planar architecture",
+    "num_qubits": 9,
+    "topology": "2D 3x3 nearest-neighbor grid (planar square lattice)",
+    "coupling_map": [
+        [0, 1], [1, 2], [3, 4], [4, 5], [6, 7], [7, 8],
+        [0, 3], [3, 6], [1, 4], [4, 7], [2, 5], [5, 8]
+    ],
+    "bidirectional": True,
+    "basis_gates": ["rz", "sx", "x", "cx"],
+    "noise": {
+        "type": "challenge_defined",
+        "source": "Challenge Kit section 3.4",
+        "single_qubit_depolarizing": 0.001,
+        "cx_depolarizing": 0.005,
+        "readout_bitflip": 0.01
+    },
+    "benchmark": {
+        "shots": 4096,
+        "transpile_optimization_level": 1,
+        "layout_routing": "SABRE",
+        "seed": 42
+    },
+    "note": "Candidate architecture: 3x3 planar square grid. Maximum degree 4, diameter 4, 12 nearest-neighbor couplers. Designed to minimize SWAP routing overhead."
+}
+
+
 def load_processor(key: str) -> dict:
-    return json.loads((Path(PROCESSORS_DIR) / f"processor_{key}.json").read_text())
+    p = Path(PROCESSORS_DIR) / f"processor_{key}.json"
+    if p.exists():
+        return json.loads(p.read_text(encoding="utf-8"))
+    if key == "D":
+        return PROCESSOR_D_SPEC
+    raise FileNotFoundError(f"Processor file not found: {p}")
 
 
 def build_graph(edges, n_qubits: int) -> nx.Graph:
@@ -351,6 +384,158 @@ def run_ab_experiment(circuit, expected: str, shots: int = 4096) -> pd.DataFrame
                      "p_success_ideal": ideal.get(expected, 0) / shots, "p_success_noisy": noisy.get(expected, 0) / shots,
                      "noise_model": "kit fixed model", "transpile": "opt_level=1, SABRE, seed=42"})
     return pd.DataFrame(rows)
+
+
+def ghz5_circuit():
+    """Return the measured star-GHZ circuit for processor architecture probing."""
+    from qiskit import QuantumCircuit
+    qc = QuantumCircuit(5, 5, name="STAR-GHZ-5")
+    qc.h(0)
+    for q in range(1, 5):
+        qc.cx(0, q)
+    qc.measure(range(5), range(5))
+    return qc
+
+
+def run_probe(shots: int = 4096, seed: int = 42) -> list[dict]:
+    """Transpile and simulate the star-GHZ-5 circuit on A, B, and D."""
+    from qiskit import transpile, __version__ as qiskit_version
+    from qiskit_aer import AerSimulator, __version__ as aer_version
+    import csv, math
+    from .problem import RESULTS_FIGURES, RESULTS_TABLES
+
+    logical = ghz5_circuit()
+    noise_model = fixed_noise_model()
+    rows = []
+    circuit_text = ["Logical circuit (same input on A, B, D):", str(logical)]
+    basis_gates = ["rz", "sx", "x", "cx"]
+    
+    for key in ("A", "B", "D"):
+        processor = load_processor(key)
+        cmap = to_qiskit_coupling_map(key)
+        compiled = transpile(
+            logical,
+            coupling_map=cmap,
+            basis_gates=basis_gates,
+            optimization_level=1,
+            layout_method="sabre",
+            routing_method="sabre",
+            seed_transpiler=seed,
+        )
+        routed = transpile(
+            logical,
+            coupling_map=cmap,
+            basis_gates=basis_gates + ["swap"],
+            optimization_level=1,
+            layout_method="sabre",
+            routing_method="sabre",
+            seed_transpiler=seed,
+        )
+        ideal_counts = AerSimulator(seed_simulator=seed).run(compiled, shots=shots).result().get_counts()
+        noisy_counts = AerSimulator(noise_model=noise_model, seed_simulator=seed).run(compiled, shots=shots).result().get_counts()
+        
+        clean_ideal = {k.replace(" ", ""): v for k, v in ideal_counts.items()}
+        clean_noisy = {k.replace(" ", ""): v for k, v in noisy_counts.items()}
+        p_ideal = (clean_ideal.get("00000", 0) + clean_ideal.get("11111", 0)) / shots
+        p_noisy = (clean_noisy.get("00000", 0) + clean_noisy.get("11111", 0)) / shots
+        active = {compiled.find_bit(q).index for inst in compiled.data for q in inst.qubits}
+        
+        rows.append({
+            "processor": key,
+            "processor_name": processor["name"],
+            "logical_qubits": logical.num_qubits,
+            "physical_qubits_available": processor["num_qubits"],
+            "physical_qubits_used": len(active),
+            "cx_count": int(compiled.count_ops().get("cx", 0)),
+            "depth": int(compiled.depth()),
+            "swap_count": int(routed.count_ops().get("swap", 0)),
+            "shots": shots,
+            "p_success_ideal": p_ideal,
+            "p_success_noisy": p_noisy,
+            "noisy_standard_error": math.sqrt(p_noisy * (1 - p_noisy) / shots),
+            "seed_transpiler": seed,
+            "seed_simulator": seed,
+        })
+        circuit_text.extend([f"\nProcessor {key} transpiled circuit:", str(compiled)])
+
+    RESULTS_TABLES.mkdir(parents=True, exist_ok=True)
+    RESULTS_FIGURES.mkdir(parents=True, exist_ok=True)
+    with (RESULTS_TABLES / "architecture_probe.csv").open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    return rows
+
+
+def run_t1_t2_sweep(
+    t1_values_us: list[float] | None = None,
+    time_1q_ns: float = 35.0,
+    time_2q_ns: float = 250.0,
+    shots: int = 4096,
+    seed: int = 42,
+) -> list[dict]:
+    """Sweep thermal relaxation (T1) and dephasing (T2) times across Processors A, B, and D."""
+    from qiskit import transpile
+    from qiskit_aer import AerSimulator
+    from qiskit_aer.noise import NoiseModel, ReadoutError, thermal_relaxation_error
+    import csv, math
+    from .problem import RESULTS_TABLES
+
+    if t1_values_us is None:
+        t1_values_us = [15.0, 30.0, 50.0, 80.0, 120.0, 200.0]
+
+    logical = ghz5_circuit()
+    basis_gates = ["rz", "sx", "x", "cx"]
+    compiled_circuits = {}
+    for key in ("A", "B", "D"):
+        cmap = to_qiskit_coupling_map(key)
+        compiled_circuits[key] = transpile(
+            logical,
+            coupling_map=cmap,
+            basis_gates=basis_gates,
+            optimization_level=1,
+            layout_method="sabre",
+            routing_method="sabre",
+            seed_transpiler=seed,
+        )
+
+    rows = []
+    p_readout = FIXED_NOISE["readout_bitflip"]
+    readout_err = ReadoutError([[1 - p_readout, p_readout], [p_readout, 1 - p_readout]])
+
+    for t1_us in t1_values_us:
+        t1_ns = t1_us * 1e3
+        t2_ns = min(2.0 * t1_ns, t1_ns * 1.4)
+        nm = NoiseModel(basis_gates=basis_gates)
+        e1 = thermal_relaxation_error(t1_ns, t2_ns, time_1q_ns)
+        e2 = thermal_relaxation_error(t1_ns, t2_ns, time_2q_ns).expand(
+            thermal_relaxation_error(t1_ns, t2_ns, time_2q_ns)
+        )
+        nm.add_all_qubit_quantum_error(e1, ["rz", "sx", "x"])
+        nm.add_all_qubit_quantum_error(e2, ["cx"])
+        nm.add_all_qubit_readout_error(readout_err)
+
+        sim = AerSimulator(noise_model=nm, seed_simulator=seed)
+        row = {
+            "t1_us": t1_us,
+            "t2_us": round(t2_ns / 1e3, 1),
+            "gate_time_1q_ns": time_1q_ns,
+            "gate_time_2q_ns": time_2q_ns,
+        }
+        for key in ("A", "B", "D"):
+            counts = sim.run(compiled_circuits[key], shots=shots).result().get_counts()
+            clean = {k.replace(" ", ""): v for k, v in counts.items()}
+            fid = (clean.get("00000", 0) + clean.get("11111", 0)) / shots
+            row[f"fidelity_{key}"] = round(fid, 4)
+            row[f"stderr_{key}"] = round(math.sqrt(fid * (1 - fid) / shots), 4)
+        rows.append(row)
+
+    RESULTS_TABLES.mkdir(parents=True, exist_ok=True)
+    with (RESULTS_TABLES / "t1_t2_sweep.csv").open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    return rows
 
 
 if __name__ == "__main__" and len(__import__("sys").argv) > 1 and __import__("sys").argv[1] == "build":

@@ -110,8 +110,60 @@ class Platform:
     description: str
 
 
+DEFAULT_PLATFORMS = {
+    "A": {
+        "key": "A",
+        "name": "Platform A",
+        "role": "normal laptop environment (resource-rich reference)",
+        "status": "DEFINED - Track 5 standardized platform specification: Laptop reference environment",
+        "cpu_cores": None,
+        "mem_budget_mb": None,
+        "chunk_bytes": None,
+        "param_set": "pqc-L3",
+        "description": "Headline 'laptop' case: all available CPU cores, no memory budget. The whole payload is sent as ONE AES-256-GCM record (no streaming)."
+    },
+    "B": {
+        "key": "B",
+        "name": "Platform B",
+        "role": "constrained mid-range (small VM / gateway style)",
+        "status": "DEFINED - Track 5 standardized platform specification: Constrained mid-range gateway",
+        "cpu_cores": 1,
+        "mem_budget_mb": 128,
+        "chunk_bytes": 1048576,
+        "param_set": "pqc-L3",
+        "description": "1 CPU core (affinity-pinned); extra memory budget of 128 MB over the process baseline; 1 MiB streaming records."
+    },
+    "C": {
+        "key": "C",
+        "name": "Platform C",
+        "role": "edge device (limited CPU and memory)",
+        "status": "DEFINED - Track 5 standardized platform specification: Edge device (limited CPU/RAM)",
+        "cpu_cores": 1,
+        "mem_budget_mb": 8,
+        "chunk_bytes": 16384,
+        "param_set": "pqc-L3",
+        "description": "Headline 'edge' case: 1 CPU core (affinity-pinned), 8 MB working-set budget, 16 KiB streaming records."
+    },
+    "D": {
+        "key": "D",
+        "name": "Platform D (custom)",
+        "role": "embedded gateway with a tuned record size",
+        "status": "CUSTOM DESIGN - chunk size justified by results/tables/chunk_sweep.csv (see report.md, Platform D section)",
+        "cpu_cores": 1,
+        "mem_budget_mb": 8,
+        "chunk_bytes": 65536,
+        "param_set": "pqc-L3",
+        "description": "Same hardware budget as Platform C (1 core, 8 MB) but the record size is chosen by a rule fixed in advance on results/tables/chunk_sweep.csv: the smallest record size reaching >=90% of the best in-budget throughput. Trade-off: fewer records, less per-record overhead and CPU time versus a larger working set and a larger retransmission unit."
+    }
+}
+
+
 def load_platform(key: str) -> Platform:
-    data = json.loads((PROCESSORS_DIR / f"platform_{key}.json").read_text())
+    p = PROCESSORS_DIR / f"platform_{key}.json"
+    if p.exists():
+        data = json.loads(p.read_text(encoding="utf-8"))
+    else:
+        data = DEFAULT_PLATFORMS[key]
     return Platform(**{k: data[k] for k in Platform.__dataclass_fields__})
 
 
