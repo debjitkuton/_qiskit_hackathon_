@@ -1,9 +1,8 @@
 module,logical_lines,bytes
 __init__.py,2,134
-architecture_probe.py,222,10783
 metrics.py,378,23658
-problem.py,84,4715
+problem.py,134,7070
 process.py,698,33616
-routing.py,288,17090
-visualization.py,258,14674
-TOTAL,1930,104670
+routing.py,465,24959
+visualization.py,282,15640
+TOTAL,1959,105077
