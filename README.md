@@ -13,6 +13,40 @@
 
 ---
 
+## Repository structure
+
+```
+project/
+├── README.md
+├── main.ipynb
+├── requirements.txt
+├── data/
+│   ├── raw/
+│   └── processed/
+├── processors/
+│   ├── processor_A.json
+│   └── processor_B.json
+├── src/
+│   ├── __init__.py
+│   ├── problem.py
+│   ├── process.py
+│   ├── routing.py
+│   ├── metrics.py
+│   └── visualization.py
+├── results/
+│   ├── tables/
+│   └── figures/
+├── report.md
+└── assets/
+    └── qff_phase1_latex_images/
+        ├── eq_qubit_state.png
+        ├── eq_bell_state.png
+        ├── eq_graph.png
+        ├── eq_bell_fidelity.png
+        ├── eq_zz_expectation.png
+        └── eq_standard_error.png
+```
+
 ## Problem summary
 Build a messaging / file-transfer demo whose key establishment and authentication survive a quantum adversary: ML-KEM for the key,
 ML-DSA for authentication, HKDF-SHA256 for key derivation and AES-256-GCM for payloads. Benchmark it against the classical ECDH P-256 baseline and a
