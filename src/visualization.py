@@ -232,9 +232,15 @@ def fig_routing() -> Path | None:
     cols = [c for c in ["Processor A", "Processor B", "Processor D (3x3 Grid)"] if c in piv.columns]
     piv = piv[cols]
     ax = piv.plot.bar(figsize=(10, 4.8), color=["#2563eb", "#dc2626", "#059669"], rot=15)
-    ax.set_ylabel("estimated SWAPs")
-    ax.set_title("Illustrative SWAP routing overhead: Processor A vs B vs D (identity layout)")
-    ax.grid(axis="y", alpha=0.3)
+    # Save AB-only baseline comparison
+    cols_ab = [c for c in ["Processor A", "Processor B"] if c in piv.columns]
+    if cols_ab:
+        ax_ab = piv[cols_ab].plot.bar(figsize=(8.5, 4.5), color=["#2563eb", "#dc2626"], rot=15)
+        ax_ab.set_ylabel("estimated SWAPs")
+        ax_ab.set_title("Illustrative SWAP routing overhead: Processor A vs B (identity layout)")
+        ax_ab.grid(axis="y", alpha=0.3)
+        _save(ax_ab.get_figure(), "routing_estimate_AB.png")
+
     return _save(ax.get_figure(), "routing_estimate_ABD.png")
 
 
