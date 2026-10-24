@@ -44,10 +44,10 @@ Organizer payloads (about 1 KB, 100 KB, 10 MB): put them in `data/raw/` with `1K
 Missing files are replaced by deterministic stand-ins `data/raw/standin_*.bin` (seed 42; seed 42 is never used for keys or nonces).
 
 ## Platforms and processors
-Target Platforms A/B/C/D are **classical** CPU/memory budgets (`processors/platform_*.json`):
+Target Platforms A/B/C/D are **classical** CPU/memory budgets (`DEFAULT_PLATFORMS` in `src/problem.py`, exported to `results/tables/platform_specs.csv`):
 A = normal laptop (all cores, no budget, single record), B = constrained (1 core, 128 MB, 1 MiB records), C = edge (1 core, 8 MB, 16 KiB records),
 D = custom edge gateway (1 core, 8 MB, 64 KiB records chosen by a pre-declared rule on the sweep).
-The provided final Challenge Kit names A/B/C as fixed target platforms but does not list their numeric CPU/RAM settings in the PS-P1 entry. Treat these JSON values as project configuration until they are checked against the organizer's released platform specification.
+The provided final Challenge Kit names A/B/C as fixed target platforms but does not list their numeric CPU/RAM settings in the PS-P1 entry. Treat these values as project configuration until they are checked against the organizer's released platform specification.
 
 Processor A and B are separate Phase 1 architecture/qualification artifacts; they are not quantum backends for the PQC benchmark. **Processor A** is configured as the 2016-inspired 5-qubit reference topology (edges 0-1, 1-2, 2-3, 1-4 with synthetic noise model) and **Processor B** is configured with its 9-qubit chorded mesh-loop coupling map (12 edges). The project validator checks these exact required maps. In addition, our team designed and simulated **Processor D** (3x3 planar grid) for comparative routing analysis. PQC performance measurements use classical Target Platforms A/B/C and custom Platform D.
 

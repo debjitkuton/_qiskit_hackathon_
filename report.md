@@ -72,7 +72,7 @@ The hybrid combiner (concatenate both secrets, then HKDF with the transcript) fo
 * **Bytes exchanged:** every byte the client sends and receives, including 4-byte frame headers.
 * **RAM:** Python-heap peak (`tracemalloc`) while moving the payload, plus process RSS growth. The heap peak is the primary number because
   RSS growth hides small working sets when the allocator reuses pages.
-* **Code size:** logical (non-blank, non-comment) lines per module; regenerated after the backend and topology updates: `process.py` has 645 lines and `src/` totals 1,569 lines (`results/tables/code_size.csv`).
+* **Code size:** logical (non-blank, non-comment) lines per module; regenerated after the backend and topology updates: `process.py` has 698 lines and `src/` totals 1,959 lines (`results/tables/code_size.csv`).
 * Payloads: organizer files in `data/raw/` are used if present; otherwise deterministic stand-ins of 1 KB, 100 KB and 10 MB (seed 42).
 
 ## 4. Results
@@ -190,7 +190,7 @@ The 2016-inspired reference (Processor A) and chorded mesh loop (Processor B) ha
 
 ### 6.3 Routing evidence and transpilation status
 
-The pure-Python routing table uses an identity initial layout and greedy shortest-path SWAP insertion to provide baseline analytical estimates across diverse algorithmic workloads (`results/tables/routing_estimate.csv`). In addition, a verified Qiskit architecture probe (`src/architecture_probe.py`) was executed across Processors A, B, and D using Qiskit Aer under the Challenge Kit's exact transpilation settings (optimization level 1, SABRE layout and routing, seed 42) and fixed noise model (depolarizing + readout errors, 4096 shots).
+The pure-Python routing table uses an identity initial layout and greedy shortest-path SWAP insertion to provide baseline analytical estimates across diverse algorithmic workloads (`results/tables/routing_estimate.csv`). In addition, a verified Qiskit architecture probe (`src/routing.py`) was executed across Processors A, B, and D using Qiskit Aer under the Challenge Kit's exact transpilation settings (optimization level 1, SABRE layout and routing, seed 42) and fixed noise model (depolarizing + readout errors, 4096 shots).
 
 ### 6.4 Ideology & Architecture Design of Processor D (Proposed Solution)
 

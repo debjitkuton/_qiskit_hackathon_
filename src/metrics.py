@@ -402,7 +402,7 @@ def run_all(quick: bool = False, sets=None, platform_keys=("A", "B", "C", "D")) 
     (RESULTS_TABLES / "chunk_sweep_recommendation.json").write_text(json.dumps(
         {"rule": "smallest record size reaching >=90% of best in-budget throughput", "budget_mb": d.mem_budget_mb,
          "recommended_chunk_bytes": rec, "platform_D_json_chunk_bytes": d.chunk_bytes, "match": rec == d.chunk_bytes}, indent=1))
-    print(f"      recommended Platform D record size = {rec}; processors/platform_D.json has {d.chunk_bytes}"
+    print(f"      recommended Platform D record size = {rec}; Platform D config has {d.chunk_bytes}"
           + ("" if rec == d.chunk_bytes else "  <-- update platform_D.json and re-run to keep them consistent"))
     print("[7/7] platform benchmark"); run_benchmark(sets, platform_keys, quick=quick)
     if {"A", "C"} <= set(platform_keys):
