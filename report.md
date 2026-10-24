@@ -72,7 +72,7 @@ The hybrid combiner (concatenate both secrets, then HKDF with the transcript) fo
 * **Bytes exchanged:** every byte the client sends and receives, including 4-byte frame headers.
 * **RAM:** Python-heap peak (`tracemalloc`) while moving the payload, plus process RSS growth. The heap peak is the primary number because
   RSS growth hides small working sets when the allocator reuses pages.
-* **Code size:** logical (non-blank, non-comment) lines per module; regenerated after the backend and topology updates: `process.py` has 698 lines and `src/` totals 1,959 lines (`results/tables/code_size.csv`).
+* **Code size:** logical (non-blank, non-comment) lines per module; regenerated after the backend and topology updates: `process.py` has 698 lines and `src/` totals 1,982 lines (`results/tables/code_size.csv`).
 * Payloads: organizer files in `data/raw/` are used if present; otherwise deterministic stand-ins of 1 KB, 100 KB and 10 MB (seed 42).
 
 ## 4. Results
@@ -179,7 +179,7 @@ The PQC channel benchmark runs on classical target platforms. Processor A and B 
 
 | Processor | Qubits | Required topology | Undirected coupling edges |
 |---|---:|---|---|
-| A | 5 | 2016-inspired reference (five-node graph) | (0,1), (1,2), (2,3), (1,4) |
+| A | 5 | 2016-inspired reference (five-node graph) | (0,1), (1,2), (1,3), (3,4) |
 | B | 9 | Chorded mesh-loop topology | (0,1), (0,8), (1,2), (1,6), (2,3), (2,5), (2,6), (3,4), (4,5), (5,6), (6,7), (6,8) |
 
 The exact maps are defined in `src/routing.py` and serialized in `processors/processor_A.json` and `processors/processor_B.json`. The validator checks qubit count and the exact undirected edge set. Processor C is a 13-qubit study/reference topology only; this project does not claim a required C implementation or execution.
@@ -200,7 +200,7 @@ To address the Phase 1 judging requirement regarding architectural limitations a
 
 1. **Processor A (5-qubit 2016-inspired reference):**
    * **Central hub topology:** Configured as a 5-node graph with hub node 1 (degree 3) connecting to peripheral nodes 0, 4, and 2, with node 2 chaining to node 3.
-   * **Routing overhead:** While achieving a compact diameter of 3 and average shortest path of 1.800, non-local operations between leaf node 3 and leaves 0/4 require multi-hop routing, resulting in 1 SWAP for star-entanglement and up to 9 SWAPs for all-to-all workloads.
+   * **Routing overhead:** While achieving a compact diameter of 3 and average shortest path of 1.800, non-local operations between leaf node 3 and leaves 0/4 require multi-hop routing, resulting in 1 SWAP for star-entanglement and 8 SWAPs for all-to-all workloads.
 
 2. **Processor B (9-qubit chorded mesh-loop topology):**
    * **Frequency crowding at degree-5 hub:** Node 6 connects to 5 neighbors (qubits 1, 2, 5, 7, 8). In superconducting transmon hardware, coupling 5 transmons to a single resonator introduces severe microwave frequency allocation crowding (risk of $\omega_{01} \approx \omega_{12}$ anharmonicity collisions) and parasitic $ZZ$-crosstalk.
@@ -225,7 +225,7 @@ The design philosophy of **Processor D** balances physical fabrication limits wi
 | **Avg Shortest Path** | 1.800 | 1.944 | **2.000** | Highly efficient nearest-neighbor routing |
 | **Max Degree** | 3 | 5 | **4** | Avoids degree-5 transmon frequency crowding |
 | **Min Degree (Leaves)** | 1 (leaves: 0, 3, 4) | 1 (leaf: 7) | **2 (zero dead ends)** | Eliminates single-point routing traps |
-| **All-to-All 5Q SWAPs** | 9 | 12 | **8** | **$33.3\%$ SWAP reduction** vs B ($8$ vs $12$) |
+| **All-to-All 5Q SWAPs** | 8 | 12 | **8** | **$33.3\%$ SWAP reduction** vs B ($8$ vs $12$) |
 | **GHZ-5 Transpiled SWAPs** | 1 | 0 | **0** | Zero routing overhead on star entanglement |
 | **Multi-Path Redundancy** | None (tree) | Asymmetric loops | **Symmetric $3\times3$ grid** | Uniform alternative paths across all interior nodes |
 
@@ -235,13 +235,13 @@ To validate the theoretical performance of Processors A, B, and D, we transpiled
 
 | Processor | Available Qubits | CX Count | Circuit Depth | SWAP Count | Ideal Success Rate | Noisy Success Rate (4096 shots) | Standard Error ($\sigma$) |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **Processor A** (5Q 2016 Ref) | 5 | 7 | 11 | 1 | 1.000 | 0.9321 | 0.0039 |
+| **Processor A** (5Q 2016 Ref) | 5 | 7 | 9 | 1 | 1.000 | 0.9321 | 0.0039 |
 | **Processor B** (9Q Mesh-Loop) | 9 | **4** | **8** | **0** | 1.000 | **0.9407** | 0.0037 |
 | **Processor D** (9Q 3×3 Grid) | 9 | **4** | **8** | **0** | 1.000 | **0.9407** | 0.0037 |
 
 **Analysis of the Results:**
 * **Zero SWAP Overhead on B and D:** Both Processor B and Processor D achieve **0 SWAPs** ($\text{SWAPs} = 0$, $\text{CX} = 4$). On Processor B, high-degree physical qubit 6 directly couples to all needed targets. On Processor D, SABRE maps the central logical qubit to physical qubit 4 (the grid center with degree 4). In contrast, Processor A requires 1 SWAP (7 CXs total).
-* **Depth & Fidelity Advantage:** Both B and D minimize circuit depth to **8** (a **$27.3\%$ reduction** compared to Processor A's depth of 11). Under the depolarizing noise model, this translates directly to the highest noisy state fidelity (**$94.07\%$** vs $93.21\%$ on A).
+* **Depth & Fidelity Advantage:** Both B and D minimize circuit depth to **8** (an **$11.1\%$ reduction** compared to Processor A's depth of 9). Under the depolarizing noise model, this translates directly to the highest noisy state fidelity (**$94.07\%$** vs $93.21\%$ on A).
 * Visual artifacts: see `results/figures/processor_A_graph.png`, `results/figures/processor_B_graph.png`, `results/figures/processor_D_graph.png`, `results/figures/architecture_probe.svg`, and `results/figures/routing_estimate_ABD.png`.
 
 ### 6.6 SABRE Virtual-to-Physical Qubit Mapping on Processor D
@@ -278,7 +278,7 @@ The measured state fidelities across 4096 shots (`results/tables/t1_t2_sweep.csv
 | **200.0** | 280.0 | 0.9485 ($\pm 0.0035$) | **0.9497** ($\pm 0.0034$) | **0.9497** ($\pm 0.0034$) | Dominated by $1\%$ readout error ceiling |
 
 **Physical Insights from the Coherence Sweep:**
-1. **Low-Coherence Resilience:** In NISQ regimes with short coherence ($T_1 \le 30\,\mu\text{s}$), circuit depth is the single dominant factor in state survival. Because Processors B and D have a depth of only 8 (compared to 11 on A), qubits spend far less time undergoing decoherence during idle cycles, giving B and D a marked fidelity advantage.
+1. **Low-Coherence Resilience:** In NISQ regimes with short coherence ($T_1 \le 30\,\mu\text{s}$), circuit depth is the single dominant factor in state survival. Because Processors B and D have a depth of only 8 (compared to 9 on A), qubits spend far less time undergoing decoherence during idle cycles, giving B and D a marked fidelity advantage.
 2. Visualization: see `results/figures/t1_t2_sweep.png`.
 
 ### 6.8 Automated Unit & Integration Testing (pytest)

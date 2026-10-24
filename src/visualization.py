@@ -43,11 +43,11 @@ def _node_pos(g: nx.Graph, key: str, topology: str) -> dict:
     if key == "A":
         if "reference" in top_lower or "2016" in top_lower or "t-branch" in top_lower or "t-shape" in top_lower:
             return {
-                1: (0.0, 1.0),
-                0: (-0.8, 0.3),
-                4: (0.8, 0.3),
-                2: (0.0, -0.1),
-                3: (0.0, -1.0),
+                1: (0.05, 0.15),
+                0: (-0.45, 0.8),
+                2: (0.9, 0.3),
+                3: (-0.35, -0.4),
+                4: (-0.8, -0.9),
             }
         elif "ring" in top_lower or "cycle" in top_lower:
             return {i: (float(np.cos(2 * np.pi * i / n + np.pi / 2)), float(np.sin(2 * np.pi * i / n + np.pi / 2))) for i in range(n)}

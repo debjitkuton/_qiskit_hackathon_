@@ -29,7 +29,7 @@
       "physical_qubits_available": 5,
       "physical_qubits_used": 5,
       "cx_count": 7,
-      "depth": 11,
+      "depth": 9,
       "swap_count": 1,
       "shots": 4096,
       "p_success_ideal": 1.0,
@@ -56,7 +56,7 @@
     },
     {
       "processor": "D",
-      "processor_name": "Processor D (3x3 grid - team design)",
+      "processor_name": "Processor D (Candidate 9Q 3x3 Grid)",
       "logical_qubits": 5,
       "physical_qubits_available": 9,
       "physical_qubits_used": 5,

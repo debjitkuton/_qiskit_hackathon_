@@ -120,7 +120,7 @@ User requested replacing the processor configurations with the updated architect
 2. Processor B: 9-qubit chorded mesh-loop topology (12 edges, diameter 4, central hub node 6 with degree 5).
 
 ### Decision
-1. Update `processors/processor_A.json` to coupling map `[(0, 1), (1, 2), (2, 3), (1, 4)]`.
+1. Update `processors/processor_A.json` to coupling map `[(0, 1), (1, 2), (1, 3), (3, 4)]`.
 2. Update `processors/processor_B.json` to coupling map `[(0, 1), (0, 8), (1, 2), (1, 6), (2, 3), (2, 5), (2, 6), (3, 4), (4, 5), (5, 6), (6, 7), (6, 8)]`.
 3. Synchronize `src/routing.py`, `src/architecture_probe.py`, `src/visualization.py`, test suites, and all benchmark tables.
 

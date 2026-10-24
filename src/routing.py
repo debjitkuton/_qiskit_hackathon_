@@ -26,7 +26,7 @@ CANDIDATE_TOPOLOGIES = {
     "A": {
         "reference_2016": {
             "name": "Processor A (5-qubit 2016-inspired reference)",
-            "coupling_map": [(0, 1), (1, 2), (2, 3), (1, 4)],
+            "coupling_map": [(0, 1), (1, 2), (1, 3), (3, 4)],
             "topology": "2016-inspired five-node reference graph",
             "description": "2016-inspired five-qubit reference topology with synthetic noise model; diameter 3, average path length 1.8.",
         },
@@ -464,6 +464,29 @@ def run_probe(shots: int = 4096, seed: int = 42) -> list[dict]:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
+    (RESULTS_TABLES / "architecture_probe_circuits.txt").write_text("\n".join(circuit_text) + "\n", encoding="utf-8")
+    meta = {
+        "experiment": "supplemental star-GHZ-5 architecture probe",
+        "scope": "Qiskit processor-architecture study; not a quantum execution of the classical PS-P1 PQC channel",
+        "qiskit_version": getattr(__import__("qiskit"), "__version__", "unknown"),
+        "qiskit_aer_version": getattr(__import__("qiskit_aer"), "__version__", "unknown"),
+        "shots": shots,
+        "seed": seed,
+        "transpilation": {
+            "basis_gates": basis_gates,
+            "optimization_level": 1,
+            "layout_method": "sabre",
+            "routing_method": "sabre"
+        },
+        "noise": {
+            "single_qubit_depolarizing": 0.001,
+            "cx_depolarizing": 0.005,
+            "readout_bitflip": 0.01
+        },
+        "processors": rows,
+        "logical_circuit": str(logical)
+    }
+    (RESULTS_TABLES / "architecture_probe_metadata.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
     return rows
 
 

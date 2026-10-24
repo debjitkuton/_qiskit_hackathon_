@@ -49,7 +49,7 @@ A = normal laptop (all cores, no budget, single record), B = constrained (1 core
 D = custom edge gateway (1 core, 8 MB, 64 KiB records chosen by a pre-declared rule on the sweep).
 The provided final Challenge Kit names A/B/C as fixed target platforms but does not list their numeric CPU/RAM settings in the PS-P1 entry. Treat these values as project configuration until they are checked against the organizer's released platform specification.
 
-Processor A and B are separate Phase 1 architecture/qualification artifacts; they are not quantum backends for the PQC benchmark. **Processor A** is configured as the 2016-inspired 5-qubit reference topology (edges 0-1, 1-2, 2-3, 1-4 with synthetic noise model) and **Processor B** is configured with its 9-qubit chorded mesh-loop coupling map (12 edges). The project validator checks these exact required maps. In addition, our team designed and simulated **Processor D** (3x3 planar grid) for comparative routing analysis. PQC performance measurements use classical Target Platforms A/B/C and custom Platform D.
+Processor A and B are separate Phase 1 architecture/qualification artifacts; they are not quantum backends for the PQC benchmark. **Processor A** is configured as the 2016-inspired 5-qubit reference topology (edges 0-1, 1-2, 1-3, 3-4 with synthetic noise model) and **Processor B** is configured with its 9-qubit chorded mesh-loop coupling map (12 edges). The project validator checks these exact required maps. In addition, our team designed and simulated **Processor D** (3x3 planar grid) for comparative routing analysis. PQC performance measurements use classical Target Platforms A/B/C and custom Platform D.
 
 ### Quantum Architecture Qualification (Processors A, B, and Proposed D)
 
@@ -57,11 +57,11 @@ The Phase 1 Challenge Kit requires modeling Processors A and B as hardware quali
 
 | Processor | Qubits | Coupling Topology | Graph Diameter | Avg Shortest Path | Transpiled GHZ-5 SWAPs | Transpiled Circuit Depth |
 | :--- | :---: | :--- | :---: | :---: | :---: | :---: |
-| **Processor A** *(Required)* | 5 | 2016-Inspired Reference (Five-Node Graph) | 3 | 1.80 | **1 SWAP** | 11 |
+| **Processor A** *(Required)* | 5 | 2016-Inspired Reference (Five-Node Graph) | 3 | 1.80 | **1 SWAP** | 9 |
 | **Processor B** *(Required)* | 9 | Chorded Mesh-Loop Graph (12 edges) | 4 | 1.94 | **0 SWAPs** | 8 |
 | **Processor D** *(Proposed)* | 9 | **$3 \times 3$ Planar Grid Mesh (12 edges)** | **4** | **2.00** | **0 SWAPs** | **8** |
 
-* **Hardware Design Impact:** Both Processor B and Processor D eliminate two-qubit routing overhead completely (**0 SWAPs**) for GHZ state preparation, delivering a **$27.3\%$ circuit depth reduction** (depth 8 vs 11 on A) and superior fidelity under noisy thermal relaxation ($T_1/T_2$) simulation. Furthermore, for distributed non-local workloads (All-to-All 5Q), **Processor D achieves a $33.3\%$ SWAP reduction** over Processor B (8 vs 12 SWAPs), bounds physical qubit degree to $\le 4$ (preventing the transmon frequency-crowding and crosstalk risks of B's degree-5 hub), and eliminates all dead-end leaves (`results/tables/routing_estimate.csv`, `results/tables/architecture_probe.csv`, `results/tables/t1_t2_sweep.csv`).
+* **Hardware Design Impact:** Both Processor B and Processor D eliminate two-qubit routing overhead completely (**0 SWAPs**) for GHZ state preparation, delivering an **$11.1\%$ circuit depth reduction** (depth 8 vs 9 on A) and superior fidelity under noisy thermal relaxation ($T_1/T_2$) simulation. Furthermore, for distributed non-local workloads (All-to-All 5Q), **Processor D achieves a $33.3\%$ SWAP reduction** over Processor B (8 vs 12 SWAPs), bounds physical qubit degree to $\le 4$ (preventing the transmon frequency-crowding and crosstalk risks of B's degree-5 hub), and eliminates all dead-end leaves (`results/tables/routing_estimate.csv`, `results/tables/architecture_probe.csv`, `results/tables/t1_t2_sweep.csv`).
 
 ## Results
 `results/` includes the classical baseline, protocol-size estimates, the Platform D chunk sweep, and verified PQC benchmark measurements. The test suite has been executed top-to-bottom with verified FIPS 203/204 cryptography via `pqcrypto` (and drop-in `liboqs` support). All benchmark tables (`pqc_benchmark.csv`, `headline_comparison.csv`), MITM attack scenarios (`mitm_demo.csv`), and quantum architecture probes across Processors A, B, and D are fully verified, measured results with zero fallback mocks.
