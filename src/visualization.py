@@ -222,16 +222,17 @@ def fig_routing() -> Path | None:
     df = _csv("routing_estimate.csv")
     if df is None or df.empty:
         return None
-    valid = ["Processor A", "Processor B", "D - 3x3 Grid (team design)"]
+    valid = ["Processor A", "Processor B", "Processor D"]
     df = df[df.processor.isin(valid)].copy()
     if df.empty:
         return None
-    rename_map = {"D - 3x3 Grid (team design)": "Processor D (3x3 Grid)"}
-    df["processor"] = df["processor"].replace(rename_map)
     piv = df.pivot(index="workload", columns="processor", values="swaps_estimate")
-    cols = [c for c in ["Processor A", "Processor B", "Processor D (3x3 Grid)"] if c in piv.columns]
+    cols = [c for c in ["Processor A", "Processor B", "Processor D"] if c in piv.columns]
     piv = piv[cols]
     ax = piv.plot.bar(figsize=(10, 4.8), color=["#2563eb", "#dc2626", "#059669"], rot=15)
+    ax.set_ylabel("estimated SWAPs")
+    ax.set_title("Illustrative SWAP routing overhead: Processors A, B, and D (identity layout)")
+    ax.grid(axis="y", alpha=0.3)
     # Save AB-only baseline comparison
     cols_ab = [c for c in ["Processor A", "Processor B"] if c in piv.columns]
     if cols_ab:

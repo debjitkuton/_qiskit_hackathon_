@@ -72,7 +72,7 @@ The hybrid combiner (concatenate both secrets, then HKDF with the transcript) fo
 * **Bytes exchanged:** every byte the client sends and receives, including 4-byte frame headers.
 * **RAM:** Python-heap peak (`tracemalloc`) while moving the payload, plus process RSS growth. The heap peak is the primary number because
   RSS growth hides small working sets when the allocator reuses pages.
-* **Code size:** logical (non-blank, non-comment) lines per module; regenerated after the backend and topology updates: `process.py` has 698 lines and `src/` totals 1,982 lines (`results/tables/code_size.csv`).
+* **Code size:** logical (non-blank, non-comment) lines per module; regenerated after the backend and topology updates: `process.py` has 698 lines and `src/` totals 1,971 lines (`results/tables/code_size.csv`).
 * Payloads: organizer files in `data/raw/` are used if present; otherwise deterministic stand-ins of 1 KB, 100 KB and 10 MB (seed 42).
 
 ## 4. Results

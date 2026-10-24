@@ -198,7 +198,7 @@ def processor_graph_table() -> pd.DataFrame:
             continue
         rows.append({"processor": f"Candidate A: {t_info['name']}", "required": False, **graph_metrics(build_graph(t_info["coupling_map"], 5))})
     for t_key, t_info in CANDIDATE_TOPOLOGIES["B"].items():
-        if t_key == "mesh_baseline":
+        if t_key in ("mesh_baseline", "grid_3x3"):
             continue
         rows.append({"processor": f"Candidate B: {t_info['name']}", "required": False, **graph_metrics(build_graph(t_info["coupling_map"], 9))})
     rows.append({"processor": "Processor C (study only)", "required": False, **graph_metrics(build_graph(PROCESSOR_C_STUDY, 13))})
@@ -292,32 +292,19 @@ ILLUSTRATIVE_WORKLOADS = {
 
 def routing_estimate_table() -> pd.DataFrame:
     rows = []
-    for key in ("A", "B"):
+    for key in ("A", "B", "D"):
         proc = load_processor(key)
         g = build_graph(proc["coupling_map"], proc["num_qubits"])
         for name, gates in ILLUSTRATIVE_WORKLOADS.items():
             sw = greedy_swap_count(g, gates)
-            rows.append({"workload": name, "processor": f"Processor {key}", "logical_2q_gates": len(gates),
-                         "swaps_estimate": sw, "cx_estimate": len(gates) + 3 * sw,
-                         "method": f"identity layout, {proc.get('topology', 'custom')}"})
-    # Comparative candidate analysis as requested by organizers
-    proc_d = load_processor("D")
-    topos_to_compare = [
-        ("A - 2016 Reference (Required)", CANDIDATE_TOPOLOGIES["A"]["reference_2016"]["coupling_map"], 5),
-        ("A - Chain (optional candidate)", CANDIDATE_TOPOLOGIES["A"]["chain_baseline"]["coupling_map"], 5),
-        ("A - Ring (optional candidate)", CANDIDATE_TOPOLOGIES["A"]["ring"]["coupling_map"], 5),
-        ("B - Mesh-Loop (Required)", CANDIDATE_TOPOLOGIES["B"]["mesh_baseline"]["coupling_map"], 9),
-        ("B - Sparse Tree (optional candidate)", CANDIDATE_TOPOLOGIES["B"]["tree_sparse"]["coupling_map"], 9),
-        ("B - 3x3 Grid (optional candidate)", CANDIDATE_TOPOLOGIES["B"]["grid_3x3"]["coupling_map"], 9),
-        ("D - 3x3 Grid (team design)", proc_d["coupling_map"], proc_d["num_qubits"]),
-    ]
-    for topo_name, cm, nq in topos_to_compare:
-        g = build_graph(cm, nq)
-        for name, gates in ILLUSTRATIVE_WORKLOADS.items():
-            sw = greedy_swap_count(g, gates)
-            rows.append({"workload": name, "processor": topo_name, "logical_2q_gates": len(gates),
-                         "swaps_estimate": sw, "cx_estimate": len(gates) + 3 * sw,
-                         "method": "candidate comparison"})
+            rows.append({
+                "workload": name,
+                "processor": f"Processor {key}",
+                "logical_2q_gates": len(gates),
+                "swaps_estimate": sw,
+                "cx_estimate": len(gates) + 3 * sw,
+                "method": f"identity layout, {proc.get('topology', 'custom')}",
+            })
     return pd.DataFrame(rows)
 
 
